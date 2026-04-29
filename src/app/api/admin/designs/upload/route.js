@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabaseAdmin";
 import { upsertDesign } from "@/lib/designs";
+import { requireAdminApi } from "@/lib/authApi";
 
 export const runtime = "nodejs";
 
@@ -14,6 +15,9 @@ function normalizeSlug(slug) {
 }
 
 export async function POST(request) {
+  const gate = await requireAdminApi();
+  if (!gate.ok) return gate.response;
+
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       { ok: false, error: "supabase_not_configured" },

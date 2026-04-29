@@ -1,11 +1,15 @@
 import { AdminShell } from "@/components/admin/AdminShell";
+import { requireAdmin } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Admin",
   description: "Admin dashboard for managing content and settings.",
 };
 
-export default function Page() {
+export default async function Page() {
+  await requireAdmin();
   return (
     <AdminShell title="Overview">
       <div className="grid gap-4 sm:grid-cols-2">

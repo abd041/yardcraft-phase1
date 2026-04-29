@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/AdminShell";
+import { requireAdmin } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 const sections = [
   {
@@ -20,18 +23,17 @@ const sections = [
   },
 ];
 
-export function generateStaticParams() {
-  return sections.map((s) => ({ slug: s.slug }));
-}
-
-export function generateMetadata({ params }) {
-  const section = sections.find((s) => s.slug === params.slug);
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const section = sections.find((s) => s.slug === slug);
   if (!section) return {};
   return { title: `Admin • ${section.title}` };
 }
 
-export default function Page({ params }) {
-  const section = sections.find((s) => s.slug === params.slug);
+export default async function Page({ params }) {
+  await requireAdmin();
+  const { slug } = await params;
+  const section = sections.find((s) => s.slug === slug);
   if (!section) notFound();
 
   return (

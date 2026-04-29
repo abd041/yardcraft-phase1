@@ -39,6 +39,16 @@ create table if not exists public.designs (
 );
 ```
 
+## Supabase Auth + RBAC (Phase 1)
+
+Run the SQL in `supabase/yardcraft_phase1.sql` to set up:
+
+- `profiles` table with `role` (`admin` / `user`)
+- RLS policies for admin-only writes to `designs`
+- optional audit fields: `updated_at`, `updated_by`
+
+Note: Phase 1 intentionally only allows reading your own `profiles` row to avoid Postgres RLS recursion pitfalls.
+
 ## Routes
 
 - `/` → landing page system (`src/app/(landing)/*`)

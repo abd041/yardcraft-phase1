@@ -13,10 +13,11 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: {
-    default: "Aurum Atelier",
-    template: "%s • Aurum Atelier",
+    default: "YardCraft",
+    template: "%s • YardCraft",
   },
-  description: "Luxury mobile-first landing system with design pages and admin.",
+  description:
+    "Luxury landscaping and outdoor living transformations across Northern Virginia.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
 };
 

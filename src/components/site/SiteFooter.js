@@ -16,7 +16,7 @@ export function SiteFooter() {
             Status
           </Link>
           <Link className="hover:text-foreground transition" href="/design">
-            Design pages
+            Homeowner previews
           </Link>
         </div>
       </Container>

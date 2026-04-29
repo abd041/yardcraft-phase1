@@ -21,7 +21,7 @@ export function LocalUrgencySection() {
                 </span>
               </div>
               <h2 className="mt-3 text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                Premium install windows fill quickly in peak season.
+                Premium scheduling slots fill quickly in peak season.
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted sm:text-base sm:leading-7">
                 If you want the yard finished before the next hosting season, request your consult

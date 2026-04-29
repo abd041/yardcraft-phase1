@@ -1,6 +1,8 @@
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabaseAdmin";
 
 const TABLE = "designs";
+const BASE_SELECT = "slug,before_image,after_image,created_at";
+const AUDIT_SELECT = "slug,before_image,after_image,created_at,updated_at,updated_by";
 
 function normalizeSlug(slug) {
   const s = typeof slug === "string" ? slug.trim() : "";
@@ -11,13 +13,24 @@ export async function listDesigns() {
   if (!isSupabaseConfigured()) return [];
 
   const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
+  const first = await supabase
     .from(TABLE)
-    .select("slug,before_image,after_image,created_at")
+    .select(AUDIT_SELECT)
     .order("created_at", { ascending: false });
 
-  if (error) throw new Error(`Supabase listDesigns failed: ${error.message}`);
-  return data ?? [];
+  if (!first.error) return first.data ?? [];
+
+  // Backward compatibility if audit columns don't exist yet.
+  const fallback = await supabase
+    .from(TABLE)
+    .select(BASE_SELECT)
+    .order("created_at", { ascending: false });
+
+  if (fallback.error) {
+    throw new Error(`Supabase listDesigns failed: ${fallback.error.message}`);
+  }
+
+  return fallback.data ?? [];
 }
 
 export async function getDesignBySlug(slug) {
@@ -26,14 +39,26 @@ export async function getDesignBySlug(slug) {
   if (!isSupabaseConfigured()) return null;
 
   const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
+  const first = await supabase
     .from(TABLE)
-    .select("slug,before_image,after_image,created_at")
+    .select(AUDIT_SELECT)
     .eq("slug", s)
     .maybeSingle();
-console.log(data , "data")
-  if (error) throw new Error(`Supabase getDesignBySlug failed: ${error.message}`);
-  return data ?? null;
+
+  if (!first.error) return first.data ?? null;
+
+  // Backward compatibility if audit columns don't exist yet.
+  const fallback = await supabase
+    .from(TABLE)
+    .select(BASE_SELECT)
+    .eq("slug", s)
+    .maybeSingle();
+
+  if (fallback.error) {
+    throw new Error(`Supabase getDesignBySlug failed: ${fallback.error.message}`);
+  }
+
+  return fallback.data ?? null;
 }
 
 export async function upsertDesign(input) {
@@ -55,7 +80,7 @@ export async function upsertDesign(input) {
       payload,
       { onConflict: "slug" },
     )
-    .select("slug,before_image,after_image,created_at")
+    .select(AUDIT_SELECT)
     .single();
 
   if (error) throw new Error(`Supabase upsertDesign failed: ${error.message}`);
@@ -83,7 +108,7 @@ export async function updateDesignBySlug(slug, patch) {
     .from(TABLE)
     .update(updates)
     .eq("slug", s)
-    .select("slug,before_image,after_image,created_at")
+    .select(AUDIT_SELECT)
     .maybeSingle();
 
   if (error) throw new Error(`Supabase updateDesignBySlug failed: ${error.message}`);

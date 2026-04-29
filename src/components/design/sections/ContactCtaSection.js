@@ -44,16 +44,17 @@ export function ContactCtaSection() {
               <div className="pointer-events-none absolute inset-0">
                 <div className="absolute -right-24 -top-24 h-[280px] w-[280px] rounded-full bg-green/10 blur-3xl" />
                 <div className="absolute -left-24 bottom-[-140px] h-[340px] w-[340px] rounded-full bg-gold/10 blur-3xl" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.22),transparent_60%)]" />
               </div>
 
               <div className="relative">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="text-xs font-medium tracking-wide text-muted">
-                      QuoteIQ embed (placeholder)
+                      QuoteIQ estimate (placeholder)
                     </div>
                     <div className="mt-1 text-sm font-semibold tracking-tight text-foreground">
-                      Drop your QuoteIQ widget here
+                      Get a fast budget range + timeline
                     </div>
                   </div>
                   <span className="rounded-full border border-card-border bg-background/70 px-3 py-1 text-[11px] text-muted">
@@ -61,11 +62,24 @@ export function ContactCtaSection() {
                   </span>
                 </div>
 
-                <div className="mt-4 grid place-items-center rounded-2xl border border-card-border bg-card p-6 text-center">
-                  <div className="max-w-xs text-sm text-muted">
-                    Replace this block with your QuoteIQ embed snippet (iframe/script).
+                <div className="mt-4 rounded-2xl border border-card-border bg-card p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="text-sm text-muted">
+                      Replace this block with your QuoteIQ embed snippet (iframe/script).
+                    </div>
+                    <span className="rounded-full border border-card-border bg-black/10 px-3 py-1 text-[11px] text-muted">
+                      Secure
+                    </span>
                   </div>
-                  <div className="mt-4 h-24 w-full rounded-xl border border-card-border bg-black/10" />
+                  <div className="mt-4 h-28 w-full rounded-xl border border-card-border bg-black/10" />
+                  <div className="mt-4 grid gap-2 text-xs text-muted">
+                    <div>
+                      - We’ll confirm scope, materials, and site constraints.
+                    </div>
+                    <div>
+                      - You’ll get a clear timeline and next steps.
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-4 grid gap-2">

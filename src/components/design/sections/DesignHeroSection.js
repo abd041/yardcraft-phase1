@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { BRAND } from "@/lib/brand";
 import { Logo } from "@/components/site/Logo";
+import { BeforeAfterSlider } from "@/components/design/BeforeAfterSlider";
 
-export function DesignHeroSection({ slug, afterUrl }) {
+export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
   return (
     <section className="relative overflow-hidden border-b border-card-border/70">
       <div className="absolute inset-0">
@@ -24,16 +25,19 @@ export function DesignHeroSection({ slug, afterUrl }) {
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.68),transparent_42%,rgba(0,0,0,0.72))]" />
       </div>
 
-      <Container className="relative py-10 sm:py-14">
-        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+      <Container className="relative py-8 sm:py-12">
+        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
           <div className="flex flex-col gap-6">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="text-foreground/85">Design • {slug}</Badge>
+              <Badge className="text-foreground/85">Your YardCraft Preview</Badge>
               <span className="rounded-full border border-card-border bg-black/10 px-3 py-1 text-[11px] font-medium tracking-wide text-muted">
                 Northern Virginia
               </span>
               <span className="rounded-full border border-card-border bg-black/10 px-3 py-1 text-[11px] font-medium tracking-wide text-muted">
                 Licensed • Insured • Local
+              </span>
+              <span className="rounded-full border border-card-border bg-black/10 px-3 py-1 text-[11px] font-medium tracking-wide text-muted">
+                Ref: {slug}
               </span>
             </div>
 
@@ -50,7 +54,8 @@ export function DesignHeroSection({ slug, afterUrl }) {
 
             <p className="max-w-2xl text-pretty text-base leading-7 text-muted sm:text-lg sm:leading-8">
               This AI-generated transformation is just one idea. Our team can custom-design and
-              build the perfect outdoor space for your home.
+              build the perfect outdoor space for your home — with premium materials, clean
+              borders, and lighting that feels expensive after sunset.
             </p>
 
             <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
@@ -70,17 +75,19 @@ export function DesignHeroSection({ slug, afterUrl }) {
                 {BRAND.phoneDisplay}
               </span>
               <span className="text-xs">
-                Smooth, premium installs — clean borders, stone, lighting, outdoor living.
+                Personalized for your property • Fast consult • Premium finish
               </span>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-card-border bg-card p-6 sm:p-8">
-            <div className="flex items-start justify-between gap-3">
+          <div className="rounded-3xl border border-card-border bg-card p-4 sm:p-6">
+            <div className="flex items-start justify-between gap-3 px-2 pb-3">
               <div>
-                <div className="text-xs font-medium tracking-wide text-muted">YardCraft</div>
-                <div className="mt-1 text-lg font-semibold tracking-tight text-foreground">
-                  Outdoor Living
+                <div className="text-xs font-medium tracking-wide text-muted">
+                  Before → After
+                </div>
+                <div className="mt-1 text-sm font-semibold tracking-tight text-foreground">
+                  Your transformation preview
                 </div>
               </div>
               <div className="hidden sm:block">
@@ -88,14 +95,23 @@ export function DesignHeroSection({ slug, afterUrl }) {
               </div>
             </div>
 
-            <div className="mt-4 grid gap-3">
-              <InfoRow title="Consult" value="48-hour scheduling" />
-              <InfoRow title="Scope" value="Clear plan + materials" />
-              <InfoRow title="Finish" value="Premium details + lighting" />
+            <BeforeAfterSlider
+              beforeUrl={beforeUrl}
+              afterUrl={afterUrl}
+              beforeLabel="Before"
+              afterLabel="After"
+              heightClassName="h-[340px] sm:h-[520px]"
+              aspect="16/10"
+            />
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <InfoRow title="Consult" value="48h" />
+              <InfoRow title="Scope" value="Clear" />
+              <InfoRow title="Finish" value="Premium" />
             </div>
 
-            <div className="mt-5 rounded-2xl border border-card-border bg-black/10 px-4 py-3 text-xs text-muted">
-              Tap “Get Estimate” to see a budget range and timeline for your home.
+            <div className="mt-4 rounded-2xl border border-card-border bg-black/10 px-4 py-3 text-xs text-muted">
+              Tap “Get Estimate” for a budget range and timeline tailored to your home.
             </div>
           </div>
         </div>

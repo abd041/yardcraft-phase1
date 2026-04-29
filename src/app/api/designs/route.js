@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { listDesigns, upsertDesign } from "@/lib/designs";
+import { requireAdminApi } from "@/lib/authApi";
 
 export async function GET() {
   const designs = await listDesigns();
@@ -8,6 +9,9 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  const gate = await requireAdminApi();
+  if (!gate.ok) return gate.response;
+
   let body = null;
   try {
     body = await request.json();

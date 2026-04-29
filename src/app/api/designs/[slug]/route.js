@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getDesignBySlug, updateDesignBySlug } from "@/lib/designs";
+import { requireAdminApi } from "@/lib/authApi";
 
 export async function GET(_request, { params }) {
   const design = await getDesignBySlug(params.slug);
@@ -11,6 +12,9 @@ export async function GET(_request, { params }) {
 }
 
 export async function PATCH(request, { params }) {
+  const gate = await requireAdminApi();
+  if (!gate.ok) return gate.response;
+
   let body = null;
   try {
     body = await request.json();
