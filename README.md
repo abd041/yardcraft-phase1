@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Production-ready Next.js (App Router) starter using Tailwind CSS and JavaScript, with a clean structure for:
 
-## Getting Started
+- Luxury mobile-first landing page system
+- Dynamic design pages
+- Admin dashboard
+- API routes
+- Reusable components
 
-First, run the development server:
+## Getting started
+
+Install and run:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local` and set:
 
-## Learn More
+- `NEXT_PUBLIC_SITE_URL`: used for sitemap/robots
+- `SUPABASE_URL`: your Supabase project URL
+- `SUPABASE_SERVICE_ROLE_KEY`: server-only key used by route handlers to read/write designs
+- `SUPABASE_STORAGE_BUCKET`: Supabase Storage bucket for uploaded images (public recommended)
 
-To learn more about Next.js, take a look at the following resources:
+## Supabase schema
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Create a table called `designs`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```sql
+create table if not exists public.designs (
+  slug text primary key,
+  before_image text,
+  after_image text,
+  created_at timestamptz not null default now()
+);
+```
 
-## Deploy on Vercel
+## Routes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `/` → landing page system (`src/app/(landing)/*`)
+- `/design` → design index (`src/app/(design)/design/page.js`)
+- `/design/[slug]` → dynamic design page (`src/app/(design)/design/[slug]/page.js`)
+- `/admin` → admin dashboard shell (`src/app/(admin)/admin/*`)
+- `/api/health` → health check
+- `/api/designs` → design list
+- `/api/designs/[slug]` → single design
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Folder structure (high-signal)
+
+- `src/app/(landing)/` – landing page layouts + root page
+- `src/components/landing/` – landing page “section system”
+- `src/app/(design)/design/` – dynamic design pages
+- `src/app/(admin)/admin/` – admin dashboard pages
+- `src/app/api/` – route handlers (API routes)
+- `src/components/ui/` – reusable UI primitives
+- `src/components/site/` – header/footer/logo
+- `src/content/` – content/data stubs (landing + designs)
+- `src/lib/` – small shared utilities
+
+## Production
+
+```bash
+npm run build
+npm run start
+```
+
+## Notes
+
+- This starter intentionally keeps “real auth” out of the admin area—add your preferred auth provider + RBAC.
+- The API routes use in-repo data (`src/content/*`) as stubs; swap for DB access when ready.
