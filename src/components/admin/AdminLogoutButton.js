@@ -7,12 +7,19 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export function AdminLogoutButton() {
   const router = useRouter();
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const { supabase } = useMemo(() => {
+    try {
+      return { supabase: createSupabaseBrowserClient() };
+    } catch {
+      return { supabase: null };
+    }
+  }, []);
   const [busy, setBusy] = useState(false);
 
   async function logout() {
     setBusy(true);
     try {
+      if (!supabase) return;
       await supabase.auth.signOut();
       router.replace("/admin/login");
       router.refresh();
@@ -20,6 +27,8 @@ export function AdminLogoutButton() {
       setBusy(false);
     }
   }
+
+  if (!supabase) return null;
 
   return (
     <button

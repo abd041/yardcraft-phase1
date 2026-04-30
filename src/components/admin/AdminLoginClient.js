@@ -13,7 +13,13 @@ export function AdminLoginClient() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/admin/designs";
 
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const { supabase, supabaseInitError } = useMemo(() => {
+    try {
+      return { supabase: createSupabaseBrowserClient(), supabaseInitError: "" };
+    } catch (err) {
+      return { supabase: null, supabaseInitError: err?.message || "Supabase is not configured." };
+    }
+  }, []);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,6 +31,7 @@ export function AdminLoginClient() {
     setError("");
     setBusy(true);
     try {
+      if (!supabase) throw new Error(supabaseInitError || "Supabase is not configured.");
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -69,6 +76,17 @@ export function AdminLoginClient() {
               </p>
             </div>
 
+            {supabaseInitError || searchParams.get("error") === "supabase_not_configured" ? (
+              <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                {supabaseInitError || "Supabase is not configured for this deployment."}{" "}
+                <span className="block mt-2 text-xs text-amber-100/80">
+                  Set <span className="font-mono">NEXT_PUBLIC_SUPABASE_URL</span> and{" "}
+                  <span className="font-mono">NEXT_PUBLIC_SUPABASE_ANON_KEY</span> in Vercel
+                  Environment Variables, then redeploy.
+                </span>
+              </div>
+            ) : null}
+
             {error ? (
               <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
                 {error}
@@ -84,6 +102,7 @@ export function AdminLoginClient() {
                   type="email"
                   autoComplete="email"
                   placeholder="you@yardcraft.com"
+                  disabled={!supabase}
                   className="w-full rounded-2xl border border-card-border bg-black/10 px-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-gold/50"
                 />
               </label>
@@ -96,11 +115,16 @@ export function AdminLoginClient() {
                   type="password"
                   autoComplete="current-password"
                   placeholder="••••••••••"
+                  disabled={!supabase}
                   className="w-full rounded-2xl border border-card-border bg-black/10 px-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-gold/50"
                 />
               </label>
 
-              <Button disabled={busy} type="submit" className="mt-2 w-full justify-center">
+              <Button
+                disabled={busy || !supabase}
+                type="submit"
+                className="mt-2 w-full justify-center"
+              >
                 {busy ? "Signing in…" : "Sign in"}
               </Button>
             </form>
