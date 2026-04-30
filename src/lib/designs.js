@@ -96,8 +96,14 @@ export async function updateDesignBySlug(slug, patch) {
   if (!s) throw new Error("updateDesignBySlug requires a non-empty slug");
 
   const updates = {};
+  // Safe updates:
+  // - strings update URL fields
+  // - explicit null clears fields (used by admin UI "remove image" actions)
   if (typeof patch?.before_image === "string") updates.before_image = patch.before_image.trim();
+  else if (patch && "before_image" in patch && patch.before_image === null) updates.before_image = null;
+
   if (typeof patch?.after_image === "string") updates.after_image = patch.after_image.trim();
+  else if (patch && "after_image" in patch && patch.after_image === null) updates.after_image = null;
 
   if (Object.keys(updates).length === 0) {
     throw new Error("updateDesignBySlug requires before_image and/or after_image");

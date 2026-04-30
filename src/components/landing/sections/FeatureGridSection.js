@@ -1,28 +1,36 @@
 import Link from "next/link";
 
 import { Container } from "@/components/ui/Container";
+import { Reveal } from "@/components/motion/Reveal";
+import { Stagger } from "@/components/motion/Stagger";
 
 export function FeatureGridSection({ id, title, items }) {
   return (
     <section id={id} className="relative scroll-mt-20 py-12 sm:py-16">
       <Container>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-          <h2 className="text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            {title}
-          </h2>
-          <Link
-            href="/design"
-            className="hidden text-sm text-muted hover:text-foreground transition sm:inline-flex"
+          <Reveal
+            as="h2"
+            className="text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
           >
-            View examples
-          </Link>
+            {title}
+          </Reveal>
+          <Reveal y={10} duration={0.8}>
+            <Link
+              href="/design"
+              className="hidden text-sm text-muted transition hover:text-foreground sm:inline-flex"
+            >
+              View examples
+            </Link>
+          </Reveal>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:mt-8 sm:grid-cols-3">
+        <Stagger className="mt-6 grid gap-4 sm:mt-8 sm:grid-cols-3">
           {items.map((item) => (
             <article
               key={item.title}
-              className="group rounded-3xl border border-card-border bg-card p-6 transition hover:border-[color-mix(in_oklab,var(--gold)_40%,var(--card-border))] hover:bg-white/5.5"
+              data-stagger
+              className="group rounded-3xl border border-card-border bg-card p-6 transition hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--gold)_40%,var(--card-border))] hover:bg-white/5.5 hover:shadow-[0_22px_65px_-35px_rgba(214,178,94,0.3)]"
             >
               <div className="flex items-start justify-between gap-4">
                 <h3 className="text-base font-semibold tracking-tight text-foreground">
@@ -41,7 +49,7 @@ export function FeatureGridSection({ id, title, items }) {
               </div>
             </article>
           ))}
-        </div>
+        </Stagger>
       </Container>
     </section>
   );

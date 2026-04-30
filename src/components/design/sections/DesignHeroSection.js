@@ -4,31 +4,49 @@ import { Badge } from "@/components/ui/Badge";
 import { BRAND } from "@/lib/brand";
 import { Logo } from "@/components/site/Logo";
 import { BeforeAfterSlider } from "@/components/design/BeforeAfterSlider";
+import { Reveal } from "@/components/motion/Reveal";
+import { HeroParallax } from "@/components/motion/HeroParallax";
 
 export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
   return (
     <section className="relative overflow-hidden border-b border-card-border/70">
       <div className="absolute inset-0">
         {afterUrl ? (
-          <div
-            className="absolute inset-0 scale-[1.04] opacity-25 blur-2xl"
-            style={{
-              backgroundImage: `url(${afterUrl})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
+          <>
+            <HeroParallax
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `url(${afterUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+            <div
+              className="absolute inset-0 scale-[1.06] opacity-35 blur-2xl"
+              style={{
+                backgroundImage: `url(${afterUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+          </>
         ) : null}
         <div className="absolute -top-44 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-gold/10 blur-3xl" />
         <div className="absolute top-20 left-[-220px] h-[520px] w-[520px] rounded-full bg-green/10 blur-3xl" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_50%_-160px,rgba(214,178,94,0.18),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.68),transparent_42%,rgba(0,0,0,0.72))]" />
+        {/* Door-hanger style: dark premium overlay + warm lighting + vignette */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.78),rgba(0,0,0,0.55)_40%,rgba(0,0,0,0.84))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(1100px_520px_at_50%_18%,rgba(214,178,94,0.18),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_50%_85%,rgba(31,122,58,0.14),transparent_60%)]" />
+        <div className="lux-animated-overlay absolute inset-0 opacity-60 bg-[radial-gradient(800px_420px_at_20%_20%,rgba(214,178,94,0.10),transparent_55%),radial-gradient(700px_380px_at_85%_15%,rgba(31,122,58,0.10),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_45%,rgba(0,0,0,0.65)_100%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-[linear-gradient(90deg,transparent,color-mix(in_oklab,var(--green)_45%,transparent),color-mix(in_oklab,var(--gold)_45%,transparent),transparent)]" />
       </div>
 
       <Container className="relative py-8 sm:py-12">
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
           <div className="flex flex-col gap-6">
-            <div className="flex flex-wrap items-center gap-2">
+            <Reveal className="flex flex-wrap items-center gap-2" y={10} duration={0.7}>
               <Badge className="text-foreground/85">Your YardCraft Preview</Badge>
               <span className="rounded-full border border-card-border bg-black/10 px-3 py-1 text-[11px] font-medium tracking-wide text-muted">
                 Northern Virginia
@@ -39,9 +57,9 @@ export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
               <span className="rounded-full border border-card-border bg-black/10 px-3 py-1 text-[11px] font-medium tracking-wide text-muted">
                 Ref: {slug}
               </span>
-            </div>
+            </Reveal>
 
-            <h1 className="text-balance text-4xl font-semibold leading-[1.02] tracking-tight text-foreground sm:text-6xl">
+            <Reveal as="h1" className="text-balance text-4xl font-semibold leading-[1.02] tracking-tight text-foreground sm:text-6xl" y={18} duration={0.95}>
               <span className="block">One Possibility…</span>
               <span className="block">
                 Build Your{" "}
@@ -50,15 +68,15 @@ export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
                 </span>
                 .
               </span>
-            </h1>
+            </Reveal>
 
-            <p className="max-w-2xl text-pretty text-base leading-7 text-muted sm:text-lg sm:leading-8">
+            <Reveal as="p" className="max-w-2xl text-pretty text-base leading-7 text-muted sm:text-lg sm:leading-8" y={14} duration={0.85} delay={0.05}>
               This AI-generated transformation is just one idea. Our team can custom-design and
               build the perfect outdoor space for your home — with premium materials, clean
               borders, and lighting that feels expensive after sunset.
-            </p>
+            </Reveal>
 
-            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+            <Reveal className="grid gap-3 sm:grid-cols-2 sm:gap-4" y={12} duration={0.85} delay={0.08}>
               <a
                 href={`tel:${BRAND.phoneTel}`}
                 className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-5 py-3 text-sm font-medium tracking-tight text-foreground transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -68,19 +86,19 @@ export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
               <Button href="#quote" className="w-full justify-center">
                 Get Estimate
               </Button>
-            </div>
+            </Reveal>
 
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted">
+            <Reveal className="flex flex-wrap items-center gap-3 text-sm text-muted" y={10} duration={0.8} delay={0.12}>
               <span className="rounded-full border border-card-border bg-black/10 px-3 py-2 text-xs">
                 {BRAND.phoneDisplay}
               </span>
               <span className="text-xs">
                 Personalized for your property • Fast consult • Premium finish
               </span>
-            </div>
+            </Reveal>
           </div>
 
-          <div className="rounded-3xl border border-card-border bg-card p-4 sm:p-6">
+          <Reveal className="rounded-3xl border border-card-border bg-card p-4 sm:p-6" y={16} duration={0.9}>
             <div className="flex items-start justify-between gap-3 px-2 pb-3">
               <div>
                 <div className="text-xs font-medium tracking-wide text-muted">
@@ -113,7 +131,7 @@ export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
             <div className="mt-4 rounded-2xl border border-card-border bg-black/10 px-4 py-3 text-xs text-muted">
               Tap “Get Estimate” for a budget range and timeline tailored to your home.
             </div>
-          </div>
+          </Reveal>
         </div>
       </Container>
     </section>

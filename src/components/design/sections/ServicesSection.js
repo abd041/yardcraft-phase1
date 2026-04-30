@@ -1,4 +1,6 @@
 import { Container } from "@/components/ui/Container";
+import { Reveal } from "@/components/motion/Reveal";
+import { Stagger } from "@/components/motion/Stagger";
 
 const services = [
   { title: "Landscaping", icon: LeafIcon },
@@ -17,21 +19,31 @@ export function ServicesSection() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="text-xs font-medium tracking-wide text-muted">Services</div>
-            <h2 className="mt-1 text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            <Reveal
+              as="h2"
+              className="mt-1 text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+            >
               Premium outdoor work, done clean.
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted sm:text-base sm:leading-7">
+            </Reveal>
+            <Reveal
+              as="p"
+              className="mt-2 max-w-2xl text-sm leading-6 text-muted sm:text-base sm:leading-7"
+              y={12}
+              duration={0.85}
+            >
               Designed for luxury curb appeal and everyday comfort — with details that hold up.
-            </p>
+            </Reveal>
           </div>
-          <div className="text-sm text-muted">Transparent scope • Premium finish</div>
+          <Reveal className="text-sm text-muted" y={10} duration={0.8}>
+            Transparent scope • Premium finish
+          </Reveal>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((s) => (
             <ServiceCard key={s.title} title={s.title} Icon={s.icon} />
           ))}
-        </div>
+        </Stagger>
       </Container>
     </section>
   );
@@ -39,7 +51,10 @@ export function ServicesSection() {
 
 function ServiceCard({ title, Icon }) {
   return (
-    <div className="group rounded-3xl border border-card-border bg-card p-6 transition hover:border-[color-mix(in_oklab,var(--gold)_35%,var(--card-border))]">
+    <div
+      data-stagger
+      className="group rounded-3xl border border-card-border bg-card p-6 transition hover:border-[color-mix(in_oklab,var(--gold)_35%,var(--card-border))] hover:-translate-y-0.5 hover:shadow-[0_22px_65px_-35px_rgba(214,178,94,0.35)]"
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="text-base font-semibold tracking-tight text-foreground">{title}</div>
         <span className="grid h-10 w-10 place-items-center rounded-2xl border border-card-border bg-black/10 text-[color-mix(in_oklab,var(--green-bright)_65%,white)]">

@@ -1,4 +1,6 @@
 import { Container } from "@/components/ui/Container";
+import { Reveal } from "@/components/motion/Reveal";
+import { Stagger } from "@/components/motion/Stagger";
 
 export function TrustSection() {
   return (
@@ -13,21 +15,29 @@ export function TrustSection() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="relative">
               <div className="text-xs font-medium tracking-wide text-muted">Trust</div>
-              <h2 className="mt-1 text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              <Reveal
+                as="h2"
+                className="mt-1 text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+              >
                 Trusted By Homeowners Across Northern Virginia
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted sm:text-base sm:leading-7">
+              </Reveal>
+              <Reveal
+                as="p"
+                className="mt-2 max-w-2xl text-sm leading-6 text-muted sm:text-base sm:leading-7"
+                y={12}
+                duration={0.85}
+              >
                 Replace these placeholders with your Google rating, review screenshots,
                 neighborhood map, and finished project photos.
-              </p>
+              </Reveal>
             </div>
-            <div className="relative flex items-center gap-2 text-sm text-muted">
+            <Reveal className="relative flex items-center gap-2 text-sm text-muted" y={10} duration={0.8}>
               <Stars />
               <span>Reviews • Proof • Projects</span>
-            </div>
+            </Reveal>
           </div>
 
-          <div className="relative mt-8 grid gap-4 lg:grid-cols-4">
+          <Stagger className="relative mt-8 grid gap-4 lg:grid-cols-4" stagger={0.07}>
             <PlaceholderCard title="Google rating" kicker="Placeholder">
               Drop your Google rating widget here (stars + count).
             </PlaceholderCard>
@@ -40,7 +50,7 @@ export function TrustSection() {
             <PlaceholderCard title="Completed projects" kicker="Placeholder">
               Add a mini gallery of real installs (before/after + detail shots).
             </PlaceholderCard>
-          </div>
+          </Stagger>
         </div>
       </Container>
     </section>
@@ -49,7 +59,10 @@ export function TrustSection() {
 
 function PlaceholderCard({ title, kicker, children }) {
   return (
-    <div className="rounded-3xl border border-card-border bg-black/10 p-6">
+    <div
+      data-stagger
+      className="rounded-3xl border border-card-border bg-black/10 p-6 transition hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--gold)_35%,var(--card-border))] hover:shadow-[0_22px_65px_-35px_rgba(214,178,94,0.35)]"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="text-sm font-semibold tracking-tight text-foreground">{title}</div>
         <span className="rounded-full border border-card-border bg-background/70 px-3 py-1 text-[11px] text-muted">

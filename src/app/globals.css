@@ -33,3 +33,83 @@ body {
 ::selection {
   background: color-mix(in oklab, var(--gold) 35%, transparent);
 }
+
+@keyframes lux-pan {
+  0% {
+    transform: translate3d(-6%, -2%, 0) scale(1.02);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(5%, 1%, 0) scale(1.05);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate3d(-6%, -2%, 0) scale(1.02);
+    opacity: 0.55;
+  }
+}
+
+@keyframes lux-float {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.lux-animated-overlay {
+  animation: lux-pan 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.lux-float {
+  animation: lux-float 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lux-animated-overlay,
+  .lux-float {
+    animation: none !important;
+  }
+}
+
+/* Premium scrollbar (scoped via class) */
+.lux-scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: color-mix(in oklab, var(--gold) 55%, var(--green)) rgba(255, 255, 255, 0.06);
+}
+
+.lux-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.lux-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+}
+
+.lux-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--gold) 58%, rgba(255, 255, 255, 0.18)),
+    color-mix(in oklab, var(--green) 40%, rgba(0, 0, 0, 0.25))
+  );
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 14px 30px -20px rgba(214, 178, 94, 0.45);
+}
+
+.lux-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--gold) 66%, rgba(255, 255, 255, 0.22)),
+    color-mix(in oklab, var(--green) 46%, rgba(0, 0, 0, 0.25))
+  );
+}

@@ -1,40 +1,48 @@
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { BRAND } from "@/lib/brand";
+import { Reveal } from "@/components/motion/Reveal";
+import { Stagger } from "@/components/motion/Stagger";
 
 export function ContactCtaSection() {
   return (
     <section id="quote" className="scroll-mt-24 py-10 sm:py-14">
       <Container>
-        <div className="rounded-3xl border border-card-border bg-card p-6 sm:p-10">
+        <Reveal className="rounded-3xl border border-card-border bg-card p-6 sm:p-10" y={16}>
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
             <div>
               <div className="text-xs font-medium tracking-wide text-muted">
                 Contact / Free estimate
               </div>
-              <h2 className="mt-2 text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              <Reveal
+                as="h2"
+                className="mt-2 text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+                y={12}
+                duration={0.9}
+              >
                 Ready for a premium yard you’ll love coming home to?
-              </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-muted sm:text-base sm:leading-7">
+              </Reveal>
+              <Reveal as="p" className="mt-3 max-w-2xl text-sm leading-6 text-muted sm:text-base sm:leading-7" y={12}>
                 Call or text now for a fast consult. We’ll confirm feasibility, timeline, and a
                 budget range — then build it clean with premium materials and details.
-              </p>
+              </Reveal>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <Stagger className="mt-6 grid gap-3 sm:grid-cols-2" stagger={0.07} y={10}>
                 <a
+                  data-stagger
                   href={`tel:${BRAND.phoneTel}`}
                   className="inline-flex items-center justify-center rounded-full bg-gold px-5 py-3 text-sm font-medium tracking-tight text-black transition hover:bg-[color-mix(in_oklab,var(--gold)_88%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Call / Text Now
                 </a>
-                <Button href="#quoteiq" className="w-full justify-center">
+                <Button data-stagger href="#quoteiq" className="w-full justify-center">
                   Get Free Estimate
                 </Button>
-              </div>
+              </Stagger>
 
-              <div className="mt-4 text-sm text-muted">
+              <Reveal className="mt-4 text-sm text-muted" y={10} duration={0.8}>
                 Phone: <span className="text-foreground">{BRAND.phoneDisplay}</span>
-              </div>
+              </Reveal>
             </div>
 
             <div
@@ -62,7 +70,7 @@ export function ContactCtaSection() {
                   </span>
                 </div>
 
-                <div className="mt-4 rounded-2xl border border-card-border bg-card p-5">
+                <Reveal className="mt-4 rounded-2xl border border-card-border bg-card p-5" y={12} duration={0.9}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="text-sm text-muted">
                       Replace this block with your QuoteIQ embed snippet (iframe/script).
@@ -80,23 +88,29 @@ export function ContactCtaSection() {
                       - You’ll get a clear timeline and next steps.
                     </div>
                   </div>
-                </div>
+                </Reveal>
 
-                <div className="mt-4 grid gap-2">
-                  <Button href="#before-after" variant="secondary" className="w-full justify-center">
+                <Stagger className="mt-4 grid gap-2" stagger={0.07} y={10}>
+                  <Button
+                    data-stagger
+                    href="#before-after"
+                    variant="secondary"
+                    className="w-full justify-center"
+                  >
                     Recheck before/after
                   </Button>
                   <a
+                    data-stagger
                     href={`tel:${BRAND.phoneTel}`}
                     className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-5 py-3 text-sm font-medium tracking-tight text-foreground transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
                     Call {BRAND.phoneDisplay}
                   </a>
-                </div>
+                </Stagger>
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );

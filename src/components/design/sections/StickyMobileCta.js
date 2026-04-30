@@ -1,9 +1,61 @@
+"use client";
+
 import { Container } from "@/components/ui/Container";
 import { BRAND } from "@/lib/brand";
+import { useEffect, useRef } from "react";
+import { getGsap } from "@/lib/motion/gsap";
 
 export function StickyMobileCta() {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (prefersReduced) return;
+
+    const { gsap } = getGsap();
+
+    let lastY = window.scrollY || 0;
+    let hidden = false;
+
+    const show = () => {
+      if (!hidden) return;
+      hidden = false;
+      gsap.to(el, { y: 0, duration: 0.45, ease: "power3.out" });
+    };
+
+    const hide = () => {
+      if (hidden) return;
+      hidden = true;
+      gsap.to(el, { y: "110%", duration: 0.45, ease: "power3.out" });
+    };
+
+    // Entrance
+    gsap.fromTo(el, { y: "110%", opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "expo.out" });
+
+    const onScroll = () => {
+      const y = window.scrollY || 0;
+      const delta = y - lastY;
+      lastY = y;
+
+      if (y < 24) return show();
+      if (delta > 6) hide();
+      else if (delta < -6) show();
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-card-border/70 bg-background/80 backdrop-blur sm:hidden">
+    <div
+      ref={ref}
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-card-border/70 bg-background/80 backdrop-blur sm:hidden"
+    >
       <Container className="flex items-center gap-3 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
         <div className="min-w-0">
           <div className="truncate text-sm font-semibold tracking-tight text-foreground">
