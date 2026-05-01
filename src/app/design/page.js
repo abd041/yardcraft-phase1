@@ -13,7 +13,7 @@ export default function Page() {
     <div className="py-10 sm:py-14">
       <Container className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          <h1 className="font-serif text-3xl font-semibold leading-[1.08] tracking-[-0.01em] text-foreground">
             Design pages
           </h1>
           <p className="text-sm text-muted">

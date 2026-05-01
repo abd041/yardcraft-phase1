@@ -14,21 +14,17 @@ export function TrustSection() {
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="relative">
-              <div className="text-xs font-medium tracking-wide text-muted">Trust</div>
+              <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">
+                Trust
+              </div>
               <Reveal
                 as="h2"
-                className="mt-1 text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+                className="mt-1 font-serif text-pretty text-3xl font-semibold leading-[1.08] tracking-[-0.01em] text-foreground sm:text-4xl"
               >
                 Trusted By Homeowners Across Northern Virginia
               </Reveal>
-              <Reveal
-                as="p"
-                className="mt-2 max-w-2xl text-sm leading-6 text-muted sm:text-base sm:leading-7"
-                y={12}
-                duration={0.85}
-              >
-                Replace these placeholders with your Google rating, review screenshots,
-                neighborhood map, and finished project photos.
+              <Reveal as="p" className="mt-2 text-sm leading-6 text-muted" y={12} duration={0.85}>
+                Google reviews • Local proof • Real installs
               </Reveal>
             </div>
             <Reveal className="relative flex items-center gap-2 text-sm text-muted" y={10} duration={0.8}>
@@ -37,7 +33,7 @@ export function TrustSection() {
             </Reveal>
           </div>
 
-          <Stagger className="relative mt-8 grid gap-4 lg:grid-cols-4" stagger={0.07}>
+          <Stagger className="relative mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" stagger={0.07}>
             <PlaceholderCard title="Google rating" kicker="Placeholder">
               Drop your Google rating widget here (stars + count).
             </PlaceholderCard>

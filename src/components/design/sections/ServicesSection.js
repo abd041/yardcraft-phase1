@@ -5,11 +5,9 @@ import { Stagger } from "@/components/motion/Stagger";
 const services = [
   { title: "Landscaping", icon: LeafIcon },
   { title: "Hardscaping", icon: BlocksIcon },
-  { title: "Mulch Installation", icon: LayersIcon },
-  { title: "Cleanups", icon: SparkleIcon },
-  { title: "Planting", icon: SproutIcon },
-  { title: "Outdoor Transformations", icon: CompassIcon },
-  { title: "Patios / Walkways / Outdoor Living", icon: PathIcon },
+  { title: "Outdoor living", icon: PathIcon },
+  { title: "Landscape lighting", icon: SparkleIcon },
+  { title: "Premium installs", icon: LayersIcon },
 ];
 
 export function ServicesSection() {
@@ -18,25 +16,25 @@ export function ServicesSection() {
       <Container>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="text-xs font-medium tracking-wide text-muted">Services</div>
+            <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">
+              Services
+            </div>
             <Reveal
               as="h2"
-              className="mt-1 text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+              className="mt-1 font-serif text-pretty text-3xl font-semibold leading-[1.08] tracking-[-0.01em] text-foreground sm:text-4xl"
             >
               Premium outdoor work, done clean.
             </Reveal>
             <Reveal
               as="p"
-              className="mt-2 max-w-2xl text-sm leading-6 text-muted sm:text-base sm:leading-7"
+              className="mt-2 max-w-[62ch] text-sm leading-6 text-muted sm:text-base sm:leading-7"
               y={12}
               duration={0.85}
             >
-              Designed for luxury curb appeal and everyday comfort — with details that hold up.
+              Landscaping • Hardscaping • Outdoor living • Lighting
             </Reveal>
           </div>
-          <Reveal className="text-sm text-muted" y={10} duration={0.8}>
-            Transparent scope • Premium finish
-          </Reveal>
+          <div />
         </div>
 
         <Stagger className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -61,11 +59,7 @@ function ServiceCard({ title, Icon }) {
           <Icon className="h-5 w-5" />
         </span>
       </div>
-      <p className="mt-2 text-sm leading-6 text-muted">
-        Clean lines, premium materials, and a finish that elevates the whole property.
-      </p>
-      <div className="mt-5 h-px w-full bg-card-border/70" />
-      <div className="mt-4 text-xs text-muted">Luxury detail • Jobsite respect • Built to last</div>
+      <div className="mt-3 text-xs text-muted">Premium scope • Clean execution</div>
     </div>
   );
 }

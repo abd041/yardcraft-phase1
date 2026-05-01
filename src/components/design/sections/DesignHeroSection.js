@@ -59,7 +59,12 @@ export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
               </span>
             </Reveal>
 
-            <Reveal as="h1" className="text-balance text-4xl font-semibold leading-[1.02] tracking-tight text-foreground sm:text-6xl" y={18} duration={0.95}>
+            <Reveal
+              as="h1"
+              className="font-serif text-balance text-4xl font-semibold leading-[0.98] tracking-[-0.02em] text-foreground sm:text-6xl"
+              y={18}
+              duration={0.95}
+            >
               <span className="block">One Possibility…</span>
               <span className="block">
                 Build Your{" "}
@@ -70,7 +75,13 @@ export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
               </span>
             </Reveal>
 
-            <Reveal as="p" className="max-w-2xl text-pretty text-base leading-7 text-muted sm:text-lg sm:leading-8" y={14} duration={0.85} delay={0.05}>
+            <Reveal
+              as="p"
+              className="max-w-[62ch] text-pretty text-base leading-7 text-muted sm:text-lg sm:leading-8"
+              y={14}
+              duration={0.85}
+              delay={0.05}
+            >
               This AI-generated transformation is just one idea. Our team can custom-design and
               build the perfect outdoor space for your home — with premium materials, clean
               borders, and lighting that feels expensive after sunset.
@@ -79,7 +90,7 @@ export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
             <Reveal className="grid gap-3 sm:grid-cols-2 sm:gap-4" y={12} duration={0.85} delay={0.08}>
               <a
                 href={`tel:${BRAND.phoneTel}`}
-                className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-5 py-3 text-sm font-medium tracking-tight text-foreground transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-6 py-3.5 text-[13px] font-medium tracking-[0.04em] text-foreground transition hover:border-[color-mix(in_oklab,var(--gold)_40%,var(--card-border))] hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 Call Now
               </a>

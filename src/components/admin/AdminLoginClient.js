@@ -65,10 +65,10 @@ export function AdminLoginClient() {
 
           <div className="mt-6 rounded-3xl border border-card-border bg-card p-6 sm:p-8">
             <div className="text-center">
-              <div className="text-xs font-medium tracking-wide text-muted">
+              <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">
                 YardCraft Admin
               </div>
-              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+              <h1 className="mt-2 font-serif text-3xl font-semibold leading-[1.08] tracking-[-0.01em] text-foreground">
                 Sign in
               </h1>
               <p className="mt-2 text-sm leading-6 text-muted">
@@ -95,7 +95,9 @@ export function AdminLoginClient() {
 
             <form onSubmit={onSubmit} className="mt-6 grid gap-3">
               <label className="grid gap-2">
-                <span className="text-xs font-medium tracking-wide text-muted">Email</span>
+                <span className="text-xs font-medium tracking-[0.14em] uppercase text-muted">
+                  Email
+                </span>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -108,7 +110,9 @@ export function AdminLoginClient() {
               </label>
 
               <label className="grid gap-2">
-                <span className="text-xs font-medium tracking-wide text-muted">Password</span>
+                <span className="text-xs font-medium tracking-[0.14em] uppercase text-muted">
+                  Password
+                </span>
                 <input
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

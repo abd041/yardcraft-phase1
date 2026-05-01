@@ -2,6 +2,7 @@ import { Container } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { BRAND } from "@/lib/brand";
+import { QuoteIqEmbed } from "@/components/quoteiq/QuoteIqEmbed";
 
 export function Hero({ content }) {
   return (
@@ -19,7 +20,7 @@ export function Hero({ content }) {
               </span>
             </div>
 
-            <h1 className="text-balance text-4xl font-semibold leading-[1.01] tracking-tight text-foreground sm:text-6xl">
+            <h1 className="font-serif text-balance text-4xl font-semibold leading-[0.98] tracking-[-0.02em] text-foreground sm:text-6xl">
               <span className="block">See your yard</span>
               <span className="block">
                 transformed{" "}
@@ -29,7 +30,7 @@ export function Hero({ content }) {
                 .
               </span>
             </h1>
-            <p className="text-pretty text-base leading-7 text-muted sm:text-lg sm:leading-8">
+            <p className="max-w-[62ch] text-pretty text-base leading-7 text-muted sm:text-lg sm:leading-8">
               Luxury landscaping + outdoor living, designed for dark premium curb appeal: crisp
               borders, premium stone, and lighting that makes your home look expensive after
               sunset.
@@ -41,7 +42,7 @@ export function Hero({ content }) {
               </Button>
               <a
                 href={`tel:${BRAND.phoneTel}`}
-                className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-5 py-3 text-sm font-semibold tracking-tight text-foreground transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-6 py-3.5 text-[13px] font-medium tracking-[0.04em] text-foreground transition hover:border-[color-mix(in_oklab,var(--gold)_40%,var(--card-border))] hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 Call {BRAND.phoneDisplay}
               </a>
@@ -77,22 +78,18 @@ export function Hero({ content }) {
               <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.22),transparent_58%)]" />
             </div>
 
-            <div className="relative text-xs font-medium tracking-wide text-muted">
-              Quick quote (placeholder)
+            <div className="relative text-xs font-medium tracking-[0.14em] uppercase text-muted">
+              Instant estimate
             </div>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+            <h2 className="mt-2 font-serif text-xl font-semibold leading-[1.05] tracking-[-0.01em] text-foreground sm:text-2xl">
               Get pricing & timeline today.
             </h2>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              Replace this with your form/QuoteIQ embed. For now, this anchors from the door
-              hanger QR and keeps the experience seamless.
+            <p className="mt-2 max-w-[62ch] text-sm leading-6 text-muted">
+              Answer a few quick questions to get a fast budget range.
             </p>
 
-            <div className="mt-4 grid place-items-center rounded-2xl border border-card-border bg-black/10 p-6 text-center">
-              <div className="max-w-xs text-sm text-muted">
-                QuoteIQ embed goes here (iframe/script).
-              </div>
-              <div className="mt-4 h-24 w-full rounded-xl border border-card-border bg-black/20" />
+            <div className="mt-4">
+              <QuoteIqEmbed slug="home" pageUrl="" />
             </div>
 
             <div className="mt-4 grid gap-2">
@@ -101,7 +98,7 @@ export function Hero({ content }) {
               </Button>
               <a
                 href={`tel:${BRAND.phoneTel}`}
-                className="inline-flex items-center justify-center rounded-full bg-gold px-5 py-3 text-sm font-medium tracking-tight text-black transition hover:bg-[color-mix(in_oklab,var(--gold)_88%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="inline-flex items-center justify-center rounded-full bg-gold px-6 py-3.5 text-[13px] font-medium tracking-[0.04em] text-black transition hover:bg-[color-mix(in_oklab,var(--gold)_88%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 Call {BRAND.phoneDisplay}
               </a>

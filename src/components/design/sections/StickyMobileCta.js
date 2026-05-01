@@ -66,13 +66,13 @@ export function StickyMobileCta() {
         <div className="ml-auto flex shrink-0 gap-2">
           <a
             href={`tel:${BRAND.phoneTel}`}
-            className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-4 py-3 text-sm font-medium tracking-tight text-foreground transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-5 py-3.5 text-[13px] font-medium tracking-[0.04em] text-foreground transition hover:border-[color-mix(in_oklab,var(--gold)_40%,var(--card-border))] hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             Call Now
           </a>
           <a
             href="#quote"
-            className="inline-flex items-center justify-center rounded-full bg-green px-5 py-3 text-sm font-semibold tracking-tight text-white transition hover:bg-[color-mix(in_oklab,var(--green)_88%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="inline-flex items-center justify-center rounded-full bg-green px-5 py-3.5 text-[13px] font-medium tracking-[0.04em] text-white transition hover:bg-[color-mix(in_oklab,var(--green)_88%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             Free Estimate
           </a>

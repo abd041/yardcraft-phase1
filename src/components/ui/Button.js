@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const base =
-  "relative inline-flex items-center justify-center overflow-hidden rounded-full px-5 py-3 text-sm font-semibold tracking-tight transition active:translate-y-[0.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
+  "relative inline-flex items-center justify-center overflow-hidden rounded-full px-6 py-3.5 text-[13px] font-medium tracking-[0.04em] transition active:translate-y-[0.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
 
 const variants = {
   primary:

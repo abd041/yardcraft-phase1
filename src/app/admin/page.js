@@ -25,7 +25,9 @@ export default async function Page() {
 function Card({ title, value }) {
   return (
     <div className="rounded-2xl border border-card-border bg-black/10 p-5">
-      <div className="text-xs font-medium tracking-wide text-muted">{title}</div>
+      <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">
+        {title}
+      </div>
       <div className="mt-2 text-sm font-semibold tracking-tight text-foreground">
         {value}
       </div>

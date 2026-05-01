@@ -11,7 +11,7 @@ export function FeatureGridSection({ id, title, items }) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <Reveal
             as="h2"
-            className="text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+            className="font-serif text-pretty text-3xl font-semibold leading-[1.08] tracking-[-0.01em] text-foreground sm:text-4xl"
           >
             {title}
           </Reveal>

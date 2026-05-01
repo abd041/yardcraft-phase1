@@ -24,11 +24,15 @@ export function LocalUrgencySection() {
               </Reveal>
               <Reveal
                 as="h2"
-                className="mt-3 text-pretty text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+                className="mt-3 font-serif text-pretty text-3xl font-semibold leading-[1.08] tracking-[-0.01em] text-foreground sm:text-4xl"
               >
                 Premium scheduling slots fill quickly in peak season.
               </Reveal>
-              <Reveal as="p" className="mt-2 max-w-2xl text-sm leading-6 text-muted sm:text-base sm:leading-7" y={12}>
+              <Reveal
+                as="p"
+                className="mt-2 max-w-[62ch] text-sm leading-6 text-muted sm:text-base sm:leading-7"
+                y={12}
+              >
                 If you want the yard finished before the next hosting season, request your consult
                 now. We’ll confirm feasibility, timeline, and a budget range — with a clean scope
                 and no surprises.

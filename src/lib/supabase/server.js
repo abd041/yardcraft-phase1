@@ -22,16 +22,25 @@ export function createSupabaseServerClient() {
 
   return cookieStorePromise.then((cookieStore) =>
     createServerClient(url, anonKey, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll();
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          // In Server Components, Next.js does not allow mutating cookies.
+          // Supabase may still attempt to write refreshed auth cookies; we must no-op there.
+          // In Route Handlers / Server Actions, cookieStore.set is allowed and will succeed.
+          for (const { name, value, options } of cookiesToSet) {
+            try {
+              cookieStore.set(name, value, options);
+            } catch {
+              // Swallow to avoid crashing render with:
+              // "Cookies can only be modified in a Server Action or Route Handler."
+              return;
+            }
+          }
+        },
       },
-      setAll(cookiesToSet) {
-        for (const { name, value, options } of cookiesToSet) {
-          cookieStore.set(name, value, options);
-        }
-      },
-    },
     }),
   );
 }

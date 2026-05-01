@@ -72,7 +72,7 @@ export function AdminSidebar({ onNavigate } = {}) {
             <div className="truncate text-sm font-semibold tracking-tight text-foreground">
               YardCraft Admin
             </div>
-            <div className="truncate text-xs font-medium tracking-wide text-muted">
+            <div className="truncate text-xs font-medium tracking-[0.14em] uppercase text-muted">
               Invite-only dashboard
             </div>
           </div>

@@ -672,7 +672,7 @@ function AssetCard({
             disabled={disabled || busy || !url}
             onClick={onClear}
             className={cx(
-              "inline-flex items-center justify-center rounded-full border px-5 py-3 text-sm font-semibold tracking-tight transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60",
+              "inline-flex items-center justify-center rounded-full border px-6 py-3.5 text-[13px] font-medium tracking-[0.04em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60",
               url
                 ? "border-card-border bg-black/10 text-foreground hover:bg-white/5"
                 : "border-card-border bg-black/10 text-muted opacity-60",

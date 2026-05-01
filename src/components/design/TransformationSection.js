@@ -27,11 +27,15 @@ export function TransformationSection({
 
           <Reveal
             as="h2"
-            className="mt-3 text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+            className="mt-3 font-serif text-balance text-3xl font-semibold leading-[1.08] tracking-[-0.01em] text-foreground sm:text-4xl"
           >
             Before → After transformation
           </Reveal>
-          <Reveal as="p" className="mt-2 text-sm leading-6 text-muted sm:text-base sm:leading-7" y={12}>
+          <Reveal
+            as="p"
+            className="mt-2 max-w-[62ch] text-sm leading-6 text-muted sm:text-base sm:leading-7"
+            y={12}
+          >
             Crisp borders. Higher contrast. Clean geometry. The kind of curb appeal that makes a
             home feel premium the second you pull in.
           </Reveal>
@@ -60,7 +64,9 @@ export function TransformationSection({
           />
 
           <aside className="rounded-3xl border border-card-border bg-black/10 p-5">
-            <div className="text-xs font-medium tracking-wide text-muted">What changed</div>
+            <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">
+              What changed
+            </div>
             <Stagger className="mt-4 grid gap-3" stagger={0.08} y={10}>
               <MiniStat title="Borders" body="Crisp edges, clean geometry" />
               <MiniStat title="Materials" body="Premium stone + contrast" />

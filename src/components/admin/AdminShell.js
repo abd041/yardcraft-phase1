@@ -118,7 +118,7 @@ export function AdminShell({ title, children }) {
       <main className={["relative", shellLeftPadding].join(" ")}>
         <div className="px-4 py-8 sm:px-6 sm:py-10 lg:px-12 lg:py-12">
           <div className="mb-7">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="font-serif text-3xl font-semibold leading-[1.08] tracking-[-0.01em] text-foreground sm:text-4xl">
               {title}
             </h1>
             <p className="mt-2 max-w-3xl text-sm text-muted">
