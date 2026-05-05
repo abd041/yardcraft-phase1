@@ -15,8 +15,9 @@ export function BeforeAfterSlider({
   aspect = "16/9",
   allowDrag = true,
   onChange,
+  onUserInteract,
   className = "",
-  showRange = true,
+  showRange = false,
   chromeless = false,
 }) {
   const [value, setValue] = useState(clamp(Number(initial) || 50, 0, 100));
@@ -32,6 +33,10 @@ export function BeforeAfterSlider({
     onChange?.(pct);
   }, [pct, onChange]);
 
+  useEffect(() => {
+    setValue(clamp(Number(initial) || 50, 0, 100));
+  }, [initial]);
+
   function setFromClientX(clientX) {
     const el = rootRef.current;
     if (!el) return;
@@ -43,6 +48,7 @@ export function BeforeAfterSlider({
 
   function onPointerDown(e) {
     if (!allowDrag) return;
+    onUserInteract?.();
     // Prevent page scrolling/dragging from competing with the slider.
     e.preventDefault?.();
     draggingRef.current = true;
@@ -53,6 +59,7 @@ export function BeforeAfterSlider({
   function onPointerMove(e) {
     if (!allowDrag) return;
     if (!draggingRef.current) return;
+    onUserInteract?.();
     e.preventDefault?.();
     setFromClientX(e.clientX);
   }
@@ -78,6 +85,7 @@ export function BeforeAfterSlider({
         aria-label="Before and after image comparison"
         className={[
           "relative overflow-hidden touch-none",
+          aspect === "fill" ? "h-full min-h-full" : "",
           chromeless
             ? "h-full w-full bg-black"
             : "rounded-2xl border border-card-border bg-black/20 shadow-[0_0_0_1px_rgba(0,0,0,0.35),0_24px_60px_-45px_rgba(0,0,0,0.8)]",
@@ -121,14 +129,13 @@ export function BeforeAfterSlider({
             {hasBefore && hasAfter ? (
               <div
                 className="pointer-events-none absolute inset-y-0"
-                style={{ left: `calc(${pct}% - 1px)` }}
+                style={{ left: `calc(${pct}% - 0.5px)` }}
               >
-                <div className="h-full w-[2px] bg-[color-mix(in_oklab,var(--gold)_55%,var(--green))] shadow-[0_0_0_1px_rgba(0,0,0,0.45)]" />
-                <div className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full border border-card-border bg-background/80 backdrop-blur">
-                  <div className="absolute inset-0 grid place-items-center text-[10px] font-medium tracking-wide text-muted">
-                    DRAG
+                <div className="h-full w-px bg-white/45 shadow-[0_0_0_1px_rgba(0,0,0,0.3)]" />
+                <div className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/24 bg-black/35 shadow-[0_8px_28px_-18px_rgba(0,0,0,0.9)] backdrop-blur-md">
+                  <div className="absolute inset-0 grid place-items-center text-white/85">
+                    <HandleArrows />
                   </div>
-                  <div className="absolute inset-x-0 bottom-[10px] mx-auto h-[2px] w-7 rounded-full bg-[color-mix(in_oklab,var(--gold)_55%,var(--green))]" />
                 </div>
               </div>
             ) : null}
@@ -136,7 +143,7 @@ export function BeforeAfterSlider({
             {hasBefore ? (
               <div
                 className={[
-                  "pointer-events-none absolute left-4 z-20 rounded-full border border-card-border bg-background/70 px-3 py-1 text-[11px] font-medium tracking-wide text-muted backdrop-blur",
+                  "pointer-events-none absolute left-4 z-20 rounded-full border border-white/14 bg-white/6 px-3.5 py-1.5 text-[10px] font-medium tracking-[0.12em] uppercase text-white/78 backdrop-blur-lg shadow-[0_8px_24px_-18px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.12)]",
                   chromeless ? "top-14" : "top-4",
                 ].join(" ")}
               >
@@ -146,23 +153,13 @@ export function BeforeAfterSlider({
             {hasAfter ? (
               <div
                 className={[
-                  "pointer-events-none absolute right-4 z-20 rounded-full border border-card-border bg-background/70 px-3 py-1 text-[11px] font-medium tracking-wide text-muted backdrop-blur",
+                  "pointer-events-none absolute right-4 z-20 rounded-full border border-white/14 bg-white/6 px-3.5 py-1.5 text-[10px] font-medium tracking-[0.12em] uppercase text-white/78 backdrop-blur-lg shadow-[0_8px_24px_-18px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.12)]",
                   chromeless ? "top-14" : "top-4",
                 ].join(" ")}
               >
                 {afterLabel}
               </div>
             ) : null}
-
-            {hasBefore && hasAfter ? (
-              <div className="pointer-events-none absolute inset-x-0 bottom-3 mx-auto w-fit rounded-full border border-card-border bg-background/70 px-3 py-1 text-[11px] font-medium tracking-wide text-muted backdrop-blur">
-                {allowDrag ? "Drag or use the slider" : "Use the slider"}
-              </div>
-            ) : (
-              <div className="pointer-events-none absolute inset-x-0 bottom-3 mx-auto w-fit rounded-full border border-card-border bg-background/70 px-3 py-1 text-[11px] font-medium tracking-wide text-muted backdrop-blur">
-                {hasBefore ? "Before image loaded" : "After image loaded"}
-              </div>
-            )}
           </>
         ) : (
           <div className="grid h-full place-items-center px-6 text-center text-xs text-muted">
@@ -180,7 +177,10 @@ export function BeforeAfterSlider({
             min={0}
             max={100}
             value={pct}
-            onChange={(e) => setValue(Number(e.target.value))}
+            onChange={(e) => {
+              onUserInteract?.();
+              setValue(Number(e.target.value));
+            }}
             className="w-full accent-[color-mix(in_oklab,var(--gold)_55%,var(--green))]"
             disabled={!hasBefore || !hasAfter}
           />
@@ -190,6 +190,14 @@ export function BeforeAfterSlider({
         </div>
       ) : null}
     </div>
+  );
+}
+
+function HandleArrows() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
+      <path d="M8.5 7.5 4 12l4.5 4.5M15.5 7.5 20 12l-4.5 4.5M6 12h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 

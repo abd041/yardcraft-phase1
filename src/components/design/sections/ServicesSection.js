@@ -12,22 +12,20 @@ const services = [
 
 export function ServicesSection() {
   return (
-    <section id="services" className="scroll-mt-24 py-10 sm:py-14">
+    <section id="services" className="scroll-mt-24 py-18 sm:py-24">
       <Container>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">
-              Services
-            </div>
+            <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">Services</div>
             <Reveal
               as="h2"
-              className="mt-1 font-serif text-pretty text-3xl font-semibold leading-[1.08] tracking-[-0.01em] text-foreground sm:text-4xl"
+              className="mt-1 font-serif text-pretty text-4xl font-semibold leading-[1.06] tracking-[-0.012em] text-foreground sm:text-5xl"
             >
               Premium outdoor work, done clean.
             </Reveal>
             <Reveal
               as="p"
-              className="mt-2 max-w-[62ch] text-sm leading-6 text-muted sm:text-base sm:leading-7"
+              className="mt-3 max-w-[62ch] text-sm leading-7 text-muted sm:text-base sm:leading-8"
               y={12}
               duration={0.85}
             >
@@ -37,7 +35,7 @@ export function ServicesSection() {
           <div />
         </div>
 
-        <Stagger className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="mt-14 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((s) => (
             <ServiceCard key={s.title} title={s.title} Icon={s.icon} />
           ))}
@@ -49,17 +47,14 @@ export function ServicesSection() {
 
 function ServiceCard({ title, Icon }) {
   return (
-    <div
-      data-stagger
-      className="group rounded-3xl border border-card-border bg-card p-6 transition hover:border-[color-mix(in_oklab,var(--gold)_35%,var(--card-border))] hover:-translate-y-0.5 hover:shadow-[0_22px_65px_-35px_rgba(214,178,94,0.35)]"
-    >
+    <div data-stagger className="group border-t border-white/8 pt-7">
       <div className="flex items-start justify-between gap-4">
         <div className="text-base font-semibold tracking-tight text-foreground">{title}</div>
-        <span className="grid h-10 w-10 place-items-center rounded-2xl border border-card-border bg-black/10 text-[color-mix(in_oklab,var(--green-bright)_65%,white)]">
+        <span className="grid h-10 w-10 place-items-center rounded-full text-[color-mix(in_oklab,var(--green-bright)_65%,white)]">
           <Icon className="h-5 w-5" />
         </span>
       </div>
-      <div className="mt-3 text-xs text-muted">Premium scope • Clean execution</div>
+      <div className="mt-3 text-xs tracking-[0.08em] uppercase text-muted">Premium scope • Clean execution</div>
     </div>
   );
 }

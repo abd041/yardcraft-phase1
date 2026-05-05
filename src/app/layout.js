@@ -1,4 +1,4 @@
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 const ycSans = Inter({
@@ -8,7 +8,7 @@ const ycSans = Inter({
   display: "swap",
 });
 
-const ycSerif = Cormorant_Garamond({
+const ycSerif = Playfair_Display({
   variable: "--font-yc-serif",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],

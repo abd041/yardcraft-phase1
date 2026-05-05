@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BeforeAfterSlider } from "@/components/design/BeforeAfterSlider";
 
 function cx(...parts) {
@@ -16,85 +16,120 @@ export function PremiumBeforeAfter({
   afterLabel = "After",
 }) {
   const [open, setOpen] = useState(false);
+  const [fullscreenVisible, setFullscreenVisible] = useState(false);
   const [value, setValue] = useState(Number(initial) || 52);
-  const pressRef = useRef({ x: 0, y: 0, moved: false });
+  const [showRotateHint, setShowRotateHint] = useState(false);
 
   const hasAny = Boolean(beforeUrl || afterUrl);
 
   const onChange = useCallback((pct) => setValue(pct), []);
 
-  const slider = useMemo(() => {
-    return (
-      <BeforeAfterSlider
-        beforeUrl={beforeUrl}
-        afterUrl={afterUrl}
-        beforeLabel={beforeLabel}
-        afterLabel={afterLabel}
-        initial={value}
-        aspect="16/9"
-        onChange={onChange}
-        className="bg-black/0 border-0 p-0"
-      />
-    );
-  }, [afterLabel, afterUrl, beforeLabel, beforeUrl, onChange, value]);
+  useEffect(() => {
+    if (!open) return;
+    setFullscreenVisible(false);
+    const raf = requestAnimationFrame(() => setFullscreenVisible(true));
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      cancelAnimationFrame(raf);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) {
+      setShowRotateHint(false);
+      return;
+    }
+
+    function computeShouldShow() {
+      if (typeof window === "undefined") return false;
+      const isMobile = window.innerWidth < 768;
+      const mql = window.matchMedia?.("(orientation: portrait)");
+      const isPortrait = mql?.matches ?? window.innerHeight >= window.innerWidth;
+      return isMobile && isPortrait;
+    }
+
+    if (!computeShouldShow()) {
+      setShowRotateHint(false);
+      return;
+    }
+
+    setShowRotateHint(true);
+    const hideTimer = setTimeout(() => setShowRotateHint(false), 2600);
+
+    const mql = window.matchMedia?.("(orientation: portrait)");
+    function handleOrientationChange() {
+      if (!computeShouldShow()) {
+        setShowRotateHint(false);
+      }
+    }
+    mql?.addEventListener?.("change", handleOrientationChange);
+    window.addEventListener("resize", handleOrientationChange);
+
+    return () => {
+      clearTimeout(hideTimer);
+      mql?.removeEventListener?.("change", handleOrientationChange);
+      window.removeEventListener("resize", handleOrientationChange);
+    };
+  }, [open]);
 
   return (
     <>
       <div
-        className={cx(
-          "relative overflow-hidden rounded-[28px] border border-card-border bg-card",
-          "shadow-[0_0_0_1px_rgba(0,0,0,0.35),0_28px_90px_-60px_rgba(0,0,0,0.9)]",
-          className,
-        )}
+        className={cx("relative h-full w-full", className)}
       >
-        <div className="p-3 sm:p-4">
-          <div className="relative">
-            <div
-              role="button"
-              tabIndex={hasAny ? 0 : -1}
-              onPointerDown={(e) => {
-                pressRef.current = { x: e.clientX, y: e.clientY, moved: false };
-              }}
-              onPointerMove={(e) => {
-                const dx = Math.abs(e.clientX - pressRef.current.x);
-                const dy = Math.abs(e.clientY - pressRef.current.y);
-                if (dx > 6 || dy > 6) pressRef.current.moved = true;
-              }}
-              onClick={(e) => {
-                if (!hasAny) return;
-                // If the user dragged the slider (including the DRAG knob), don't open fullscreen.
-                if (pressRef.current.moved) return;
-                // Don't open fullscreen from the range input.
-                const target = e.target;
-                if (target instanceof HTMLElement && target.closest('input[type="range"]')) return;
-                setOpen(true);
-              }}
-              className={cx(
-                "group relative block w-full text-left",
-                hasAny ? "cursor-zoom-in" : "cursor-default",
-              )}
-              aria-label="Open fullscreen before/after"
+        <div className="relative h-full min-h-full w-full">
+          <BeforeAfterSlider
+            beforeUrl={beforeUrl}
+            afterUrl={afterUrl}
+            beforeLabel={beforeLabel}
+            afterLabel={afterLabel}
+            initial={value}
+            aspect="fill"
+            onChange={onChange}
+            chromeless
+            className="h-full min-h-full w-full bg-black/0"
+          />
+          {hasAny ? (
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="absolute right-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/35 text-white/90 backdrop-blur-md transition hover:bg-black/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+              aria-label="Open fullscreen comparison"
             >
-              {slider}
-              {hasAny ? (
-                <span className="pointer-events-none absolute right-4 top-4 rounded-full border border-card-border bg-background/70 px-3 py-1 text-[11px] font-medium tracking-wide text-muted backdrop-blur">
-                  Tap to fullscreen
-                </span>
-              ) : null}
-            </div>
-          </div>
+              <FullscreenIcon />
+            </button>
+          ) : null}
         </div>
       </div>
 
       {open ? (
         <div
-          className="fixed inset-0 z-100 bg-black/80 backdrop-blur-md"
+          className={cx(
+            "fixed inset-0 z-100 bg-black/88 backdrop-blur-md transition-opacity duration-500 ease-in-out",
+            fullscreenVisible ? "opacity-100" : "opacity-0",
+          )}
           role="dialog"
           aria-modal="true"
           aria-label="Fullscreen before and after comparison"
         >
           <div className="absolute inset-0" onClick={() => setOpen(false)} />
-          <div className="absolute inset-0">
+          <div
+            className={cx(
+              "absolute inset-0 transition duration-500 ease-in-out",
+              fullscreenVisible ? "scale-100 opacity-100" : "scale-[0.96] opacity-0",
+            )}
+          >
             <BeforeAfterSlider
               beforeUrl={beforeUrl}
               afterUrl={afterUrl}
@@ -104,24 +139,76 @@ export function PremiumBeforeAfter({
               aspect="fill"
               onChange={onChange}
               chromeless
+              onUserInteract={() => setShowRotateHint(false)}
               className="h-full w-full"
             />
           </div>
 
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.7),transparent)]" />
-          <div className="absolute left-4 top-4 text-xs font-medium tracking-[0.14em] uppercase text-white/75">
-            Fullscreen comparison
-          </div>
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="absolute right-4 top-4 rounded-full border border-white/15 bg-black/40 px-5 py-2.5 text-[13px] font-medium tracking-[0.04em] text-white backdrop-blur transition hover:bg-black/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+            className="absolute right-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white backdrop-blur transition hover:bg-black/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+            aria-label="Close fullscreen comparison"
           >
-            Close
+            <CloseIcon />
           </button>
+          <RotateHint visible={showRotateHint} />
         </div>
       ) : null}
     </>
+  );
+}
+
+function FullscreenIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+      <path d="M8 4H4v4M16 4h4v4M8 20H4v-4M20 20h-4v-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+      <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function RotateHint({ visible }) {
+  if (!visible) return null;
+  return (
+    <div className="pointer-events-none absolute bottom-6 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/12 bg-black/55 px-3.5 py-1.5 text-[10px] font-medium tracking-[0.16em] text-white/75 opacity-80 backdrop-blur-md shadow-[0_18px_45px_-28px_rgba(0,0,0,0.9)] transition-opacity duration-250 md:hidden">
+      <span className="mr-1.5 inline-flex h-3.5 w-3.5 items-center justify-center">
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
+          <path
+            d="M7 4h10a3 3 0 0 1 3 3v3"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+          <path
+            d="M17 20H7a3 3 0 0 1-3-3v-3"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+          <path
+            d="M5 7 3.5 5.5 2 7"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          />
+          <path
+            d="M19 17 20.5 18.5 22 17"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          />
+        </svg>
+      </span>
+      <span>Rotate for full view</span>
+    </div>
   );
 }
 
