@@ -12,20 +12,20 @@ const services = [
 
 export function ServicesSection() {
   return (
-    <section id="services" className="scroll-mt-24 py-18 sm:py-24">
+    <section id="services" className="scroll-mt-24 py-22 sm:py-30">
       <Container>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">Services</div>
             <Reveal
               as="h2"
-              className="mt-1 font-serif text-pretty text-4xl font-semibold leading-[1.06] tracking-[-0.012em] text-foreground sm:text-5xl"
+              className="mt-2 font-serif text-pretty text-4xl font-semibold leading-[1.1] tracking-[-0.01em] text-foreground sm:text-5xl"
             >
               Premium outdoor work, done clean.
             </Reveal>
             <Reveal
               as="p"
-              className="mt-3 max-w-[62ch] text-sm leading-7 text-muted sm:text-base sm:leading-8"
+              className="mt-4 max-w-[64ch] text-sm leading-8 text-muted sm:text-base sm:leading-9"
               y={12}
               duration={0.85}
             >
@@ -35,7 +35,7 @@ export function ServicesSection() {
           <div />
         </div>
 
-        <Stagger className="mt-14 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="mt-18 grid gap-16 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((s) => (
             <ServiceCard key={s.title} title={s.title} Icon={s.icon} />
           ))}
@@ -47,14 +47,16 @@ export function ServicesSection() {
 
 function ServiceCard({ title, Icon }) {
   return (
-    <div data-stagger className="group border-t border-white/8 pt-7">
-      <div className="flex items-start justify-between gap-4">
-        <div className="text-base font-semibold tracking-tight text-foreground">{title}</div>
-        <span className="grid h-10 w-10 place-items-center rounded-full text-[color-mix(in_oklab,var(--green-bright)_65%,white)]">
+    <div data-stagger className="group border-l border-white/8 pl-5 pt-1 sm:pl-6">
+      <div className="flex items-start justify-between gap-5">
+        <div className="text-[1.04rem] font-semibold tracking-[-0.01em] text-foreground">{title}</div>
+        <span className="mt-0.5 grid h-9 w-9 place-items-center rounded-full text-[color-mix(in_oklab,var(--green-bright)_60%,white)]">
           <Icon className="h-5 w-5" />
         </span>
       </div>
-      <div className="mt-3 text-xs tracking-[0.08em] uppercase text-muted">Premium scope • Clean execution</div>
+      <div className="mt-4 text-[11px] tracking-[0.1em] uppercase text-muted/85">
+        Premium scope • Clean execution
+      </div>
     </div>
   );
 }

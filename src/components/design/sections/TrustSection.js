@@ -4,10 +4,10 @@ import { Stagger } from "@/components/motion/Stagger";
 
 export function TrustSection() {
   return (
-    <section id="trust" className="scroll-mt-24 py-18 sm:py-24">
+    <section id="trust" className="scroll-mt-24 py-22 sm:py-30">
       <Container>
         <div className="relative px-0 sm:px-1">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="relative">
               <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">Trust</div>
               <Reveal
@@ -26,19 +26,32 @@ export function TrustSection() {
             </Reveal>
           </div>
 
-          <Stagger className="relative mt-14 grid gap-12 sm:grid-cols-2 lg:grid-cols-4" stagger={0.07}>
-            <PlaceholderCard title="Google rating" kicker="Placeholder">
-              Drop your Google rating widget here (stars + count).
-            </PlaceholderCard>
-            <PlaceholderCard title="Testimonials" kicker="Placeholder">
-              Add 2–3 short homeowner quotes with names/areas.
-            </PlaceholderCard>
-            <PlaceholderCard title="Service area map" kicker="Placeholder">
-              Embed a map showing Northern Virginia neighborhoods served.
-            </PlaceholderCard>
-            <PlaceholderCard title="Completed projects" kicker="Placeholder">
-              Add a mini gallery of real installs (before/after + detail shots).
-            </PlaceholderCard>
+          <Stagger className="relative mt-16 space-y-14" stagger={0.07}>
+            <div data-stagger className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+              <TrustShell title="Google Reviews" kicker="Social proof">
+                <div className="flex items-center gap-3">
+                  <Stars />
+                  <span className="text-sm text-muted">Live rating and verified review count</span>
+                </div>
+              </TrustShell>
+              <TrustShell title="Client identity" kicker="Name + area">
+                <p className="text-sm leading-7 text-muted">
+                  Homeowner name, neighborhood/city, and project type displayed with each review.
+                </p>
+              </TrustShell>
+            </div>
+
+            <div data-stagger className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+              <ReviewCardPlaceholder />
+              <ReviewCardPlaceholder />
+              <ReviewCardPlaceholder />
+            </div>
+
+            <div data-stagger className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+              <PhotoPlaceholder label="Project highlight" />
+              <PhotoPlaceholder label="Project highlight" />
+              <PhotoPlaceholder label="Project highlight" />
+            </div>
           </Stagger>
         </div>
       </Container>
@@ -46,17 +59,38 @@ export function TrustSection() {
   );
 }
 
-function PlaceholderCard({ title, kicker, children }) {
+function TrustShell({ title, kicker, children }) {
   return (
-    <div data-stagger className="border-t border-white/8 pt-6">
+    <div className="space-y-4 border-t border-white/8 pt-6">
       <div className="flex items-start justify-between gap-3">
         <div className="text-sm font-semibold tracking-tight text-foreground/95">{title}</div>
-        <span className="rounded-full border border-white/15 bg-black/30 px-3 py-1 text-[10px] tracking-[0.08em] uppercase text-muted">
+        <span className="rounded-full bg-black/20 px-3 py-1 text-[10px] tracking-[0.08em] uppercase text-muted/90">
           {kicker}
         </span>
       </div>
-      <div className="mt-3 text-sm leading-7 text-muted">{children}</div>
-      <div className="mt-6 h-px w-full bg-white/8" />
+      {children}
+    </div>
+  );
+}
+
+function ReviewCardPlaceholder() {
+  return (
+    <div className="space-y-4 border-t border-white/8 pt-6">
+      <p className="text-sm leading-7 text-muted">
+        “Beautiful execution, professional communication, and a result that elevated our entire home.”
+      </p>
+      <div className="text-xs tracking-[0.08em] uppercase text-muted/85">
+        Homeowner Name • Northern Virginia
+      </div>
+    </div>
+  );
+}
+
+function PhotoPlaceholder({ label }) {
+  return (
+    <div className="space-y-3">
+      <div className="aspect-4/3 w-full rounded-2xl border border-white/10 bg-white/3" />
+      <div className="text-[11px] tracking-widest uppercase text-muted/80">{label}</div>
     </div>
   );
 }

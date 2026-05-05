@@ -40,7 +40,7 @@ export default async function Page({ params }) {
   const pageUrl = `${getSiteUrl()}/design/${slug}`;
 
   return (
-    <div className="pb-20 sm:pb-28">
+    <div className="pb-24 sm:pb-32">
       {/* Universal luxury background (not property-specific) */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div
@@ -68,10 +68,10 @@ export default async function Page({ params }) {
         />
       </section>
 
-      <section className="relative pb-14 pt-10 sm:pb-20 sm:pt-14">
+      <section className="relative pb-18 pt-14 sm:pb-26 sm:pt-20">
         <Container className="max-w-[680px] text-center">
-          <div className="text-[10px] font-medium tracking-[0.2em] uppercase text-muted">
-            YardCraft Preview • Ref {slug}
+          <div className="text-[10px] font-medium tracking-[0.2em] uppercase text-muted/85">
+            Private Design Preview
           </div>
           <h1 className="mx-auto mt-6 max-w-[650px] font-serif text-balance text-[2.25rem] font-semibold leading-tight tracking-[-0.016em] text-foreground sm:text-6xl">
             Your outdoors, redesigned with quiet luxury.
@@ -80,7 +80,7 @@ export default async function Page({ params }) {
             Imagine stepping into an outdoor space that feels effortless, elevated, and unmistakably yours.
           </p>
 
-          <div className="mt-11 grid gap-4 sm:grid-cols-2 sm:gap-5">
+          <div className="mt-13 grid gap-4 sm:grid-cols-2 sm:gap-5">
             <Button
               href="#quote"
               className="w-full justify-center py-[1.2rem] text-[14px] shadow-[0_18px_55px_-30px_rgba(27,138,58,0.75)] transition-all duration-300 hover:scale-[1.018] hover:brightness-105 hover:shadow-[0_26px_80px_-30px_rgba(72,198,104,0.72)] active:scale-[0.995]"
@@ -101,25 +101,25 @@ export default async function Page({ params }) {
         </Container>
       </section>
 
-      <section id="quote" className="scroll-mt-24 py-18 sm:py-24">
+      <section id="quote" className="scroll-mt-24 py-22 sm:py-30">
         <Container>
-          <div className="relative overflow-hidden rounded-[30px] border border-white/15 bg-black/35 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_35px_100px_-60px_rgba(0,0,0,0.92)] sm:p-10">
+          <div className="relative overflow-hidden rounded-[30px] bg-black/28 p-7 shadow-[0_30px_95px_-62px_rgba(0,0,0,0.96)] sm:p-12">
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute -right-24 -top-24 h-[280px] w-[280px] rounded-full bg-green/16 blur-3xl" />
               <div className="absolute -left-24 bottom-[-140px] h-[340px] w-[340px] rounded-full bg-gold/14 blur-3xl" />
               <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.22),transparent_60%)]" />
             </div>
 
-            <div className="relative grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+            <div className="relative grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-12">
               <div>
-                <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">
-                  Fast estimate
+                <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted/85">
+                  Private consultation
                 </div>
                 <h2 className="mt-2 font-serif text-pretty text-4xl font-semibold leading-[1.06] tracking-[-0.012em] text-foreground sm:text-5xl">
-                  Get pricing & timeline today.
+                  Receive your tailored pricing and plan.
                 </h2>
                 <p className="mt-3 max-w-[52ch] text-sm leading-7 text-muted sm:text-base sm:leading-8">
-                  Answer a few questions for a budget range. We’ll follow up with a clean scope.
+                  Share a few details and we’ll follow up with a clear, premium scope for your home.
                 </p>
               </div>
 
@@ -137,8 +137,8 @@ export default async function Page({ params }) {
       {/* 5) Services */}
       <ServicesSection />
 
-      <footer className="mt-8 border-t border-card-border/55">
-        <Container className="flex flex-col gap-3 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+      <footer className="mt-16">
+        <Container className="flex flex-col gap-3 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} YardCraft. All rights reserved.</p>
           <a className="hover:text-foreground transition" href={`tel:${BRAND.phoneTel}`}>
             {BRAND.phoneDisplay}
