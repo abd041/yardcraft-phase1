@@ -23,11 +23,10 @@ export function Reveal({
     const ctx = gsap.context(() => {
       gsap.fromTo(
         el,
-        { opacity: 0, y, filter: "blur(6px)" },
+        { opacity: 0, y },
         {
           opacity: 1,
           y: 0,
-          filter: "blur(0px)",
           duration,
           delay,
           ease: "power3.out",

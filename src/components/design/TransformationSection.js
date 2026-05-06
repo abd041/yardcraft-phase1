@@ -46,7 +46,7 @@ export function TransformationSection({
             What’s included
           </Button>
           <Button href="#quote" className="w-full justify-center sm:w-auto">
-            Get pricing
+            Request Your Custom Plan
           </Button>
         </Reveal>
       </div>

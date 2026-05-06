@@ -88,15 +88,15 @@ export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
             </Reveal>
 
             <Reveal className="grid gap-3 sm:grid-cols-2 sm:gap-4" y={12} duration={0.85} delay={0.08}>
+              <Button href="#quote" className="w-full justify-center">
+                Request Your Custom Plan
+              </Button>
               <a
                 href={`tel:${BRAND.phoneTel}`}
-                className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-6 py-3.5 text-[13px] font-medium tracking-[0.04em] text-foreground transition hover:border-[color-mix(in_oklab,var(--gold)_40%,var(--card-border))] hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="inline-flex items-center justify-center rounded-full border border-white/45 bg-white/14 px-6 py-3.5 text-[13px] font-semibold tracking-[0.04em] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_12px_40px_-24px_rgba(0,0,0,0.45)] transition hover:border-white/60 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 Call Now
               </a>
-              <Button href="#quote" className="w-full justify-center">
-                Get Estimate
-              </Button>
             </Reveal>
 
             <Reveal className="flex flex-wrap items-center gap-3 text-sm text-muted" y={10} duration={0.8} delay={0.12}>
@@ -140,7 +140,7 @@ export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
             </div>
 
             <div className="mt-4 rounded-2xl border border-card-border bg-black/10 px-4 py-3 text-xs text-muted">
-              Tap “Get Estimate” for a budget range and timeline tailored to your home.
+              Tap “Request Your Custom Plan” for scope, pricing context, and the right next step.
             </div>
           </Reveal>
         </div>

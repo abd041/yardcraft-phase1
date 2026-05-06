@@ -9,8 +9,8 @@ export const landingContent = {
     title: "Luxury landscaping that makes the whole home feel premium.",
     subtitle:
       "High-contrast modern design, premium materials, and lighting that performs after sunset. Built clean. Scheduled fast. Finished like it should’ve been done the first time.",
-    primaryCta: { href: "#quote", label: "Get pricing & timeline" },
-    secondaryCta: { href: "tel:+15715833321", label: "Call (571) 583-3321" },
+    primaryCta: { href: "#quote", label: "Request Your Custom Plan" },
+    secondaryCta: { href: "tel:+15715833321", label: "Call Now" },
   },
   sections: {
     collections: {

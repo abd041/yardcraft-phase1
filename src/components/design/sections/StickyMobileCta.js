@@ -61,20 +61,20 @@ export function StickyMobileCta() {
           <div className="truncate text-sm font-semibold tracking-tight text-foreground">
             Your YardCraft preview is ready
           </div>
-          <div className="truncate text-xs text-muted">Call now or request a free estimate</div>
+          <div className="truncate text-xs text-muted">Call now or request your custom plan</div>
         </div>
         <div className="ml-auto flex shrink-0 gap-2">
           <a
-            href={`tel:${BRAND.phoneTel}`}
-            className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-5 py-3.5 text-[13px] font-medium tracking-[0.04em] text-foreground transition hover:border-[color-mix(in_oklab,var(--gold)_40%,var(--card-border))] hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            href="#quote"
+            className="inline-flex max-w-[158px] items-center justify-center rounded-full bg-green px-4 py-3.5 text-[11px] font-semibold leading-tight tracking-[0.03em] text-white transition hover:bg-[color-mix(in_oklab,var(--green)_88%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:max-w-none sm:px-5 sm:text-[12px] sm:leading-none"
           >
-            Call Now
+            Request Your Custom Plan
           </a>
           <a
-            href="#quote"
-            className="inline-flex items-center justify-center rounded-full bg-green px-5 py-3.5 text-[13px] font-medium tracking-[0.04em] text-white transition hover:bg-[color-mix(in_oklab,var(--green)_88%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            href={`tel:${BRAND.phoneTel}`}
+            className="inline-flex items-center justify-center rounded-full border border-white/40 bg-white/10 px-5 py-3.5 text-[13px] font-semibold tracking-[0.04em] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition hover:border-white/55 hover:bg-white/16 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            Free Estimate
+            Call Now
           </a>
         </div>
       </Container>

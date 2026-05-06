@@ -42,9 +42,9 @@ export function Hero({ content }) {
               </Button>
               <a
                 href={`tel:${BRAND.phoneTel}`}
-                className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-6 py-3.5 text-[13px] font-medium tracking-[0.04em] text-foreground transition hover:border-[color-mix(in_oklab,var(--gold)_40%,var(--card-border))] hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="inline-flex items-center justify-center rounded-full border border-white/35 bg-white/10 px-6 py-3.5 text-[13px] font-semibold tracking-[0.04em] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition hover:border-white/50 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                Call {BRAND.phoneDisplay}
+                Call Now
               </a>
             </div>
 
@@ -94,13 +94,13 @@ export function Hero({ content }) {
 
             <div className="mt-4 grid gap-2">
               <Button href={content.primaryCta.href} className="w-full justify-center">
-                Get instant estimate
+                Request Your Custom Plan
               </Button>
               <a
                 href={`tel:${BRAND.phoneTel}`}
-                className="inline-flex items-center justify-center rounded-full bg-gold px-6 py-3.5 text-[13px] font-medium tracking-[0.04em] text-black transition hover:bg-[color-mix(in_oklab,var(--gold)_88%,white)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="inline-flex items-center justify-center rounded-full border border-white/35 bg-white/10 px-6 py-3.5 text-[13px] font-semibold tracking-[0.04em] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition hover:border-white/50 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                Call {BRAND.phoneDisplay}
+                Call Now
               </a>
               <div className="text-center text-xs text-muted">
                 Prefer text? Add SMS link here when ready.

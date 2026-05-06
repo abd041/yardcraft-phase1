@@ -1,14 +1,15 @@
-import { Inter, Playfair_Display } from "next/font/google";
+import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
 
-const ycSans = Inter({
+// Manrope: body / UI / buttons / labels — pairs with Cormorant Garamond for editorial luxury.
+const ycSans = Manrope({
   variable: "--font-yc-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const ycSerif = Playfair_Display({
+const ycSerif = Cormorant_Garamond({
   variable: "--font-yc-serif",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],

@@ -84,25 +84,24 @@ export function QuoteIqEmbed({ slug, pageUrl }) {
   }
 
   return (
-    <div className="relative rounded-[28px] border border-transparent bg-black/40 p-px shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_30px_82px_-58px_rgba(0,0,0,0.98)]">
-      <div className="absolute inset-0 rounded-[28px] bg-[linear-gradient(145deg,rgba(214,178,94,0.24),rgba(31,122,58,0.2),rgba(255,255,255,0.08))]" />
-      <div className="relative rounded-[27px] bg-black/72 p-4 sm:p-5">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[27px]">
-          <div className="absolute -right-24 -top-24 h-[280px] w-[280px] rounded-full bg-green/10 blur-3xl" />
-          <div className="absolute -left-24 bottom-[-140px] h-[340px] w-[340px] rounded-full bg-gold/10 blur-3xl" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.18),transparent_55%)]" />
+    <div className="relative rounded-none border-0 bg-[#060607] p-0 shadow-[0_28px_80px_-40px_rgba(0,0,0,0.75),0_0_0_1px_rgba(0,0,0,0.45)_inset] sm:rounded-[28px] sm:border sm:border-white/[0.08] sm:p-px">
+      <div className="pointer-events-none absolute inset-0 rounded-none bg-[linear-gradient(165deg,rgba(214,178,94,0.06),transparent_42%,rgba(31,122,58,0.04)_88%)] sm:rounded-[28px]" />
+      <div className="relative rounded-none bg-[#08090a] py-6 px-1 sm:rounded-[27px] sm:p-8">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-none sm:rounded-[27px]">
+          <div className="absolute -right-16 -top-16 h-[200px] w-[200px] rounded-full bg-green/6 blur-3xl" />
+          <div className="absolute -bottom-20 -left-16 h-[220px] w-[220px] rounded-full bg-gold/5 blur-3xl" />
         </div>
-        <div className="relative rounded-3xl bg-black/55 p-2.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03),inset_0_18px_30px_-18px_rgba(255,255,255,0.04)] sm:p-3">
+        <div className="relative overflow-hidden rounded-none bg-[#030304] py-1.5 px-0 ring-0 sm:rounded-[20px] sm:p-1.5 sm:ring-1 sm:ring-white/[0.12]">
           {!loaded ? (
-            <div className="absolute inset-0 z-10 grid place-items-center rounded-3xl">
+            <div className="absolute inset-0 z-10 grid place-items-center rounded-none bg-[#040405]/94 sm:rounded-[14px]">
               <div className="w-full max-w-xl px-6 py-10">
-                <div className="mx-auto h-3 w-36 rounded-full bg-white/10" />
-                <div className="mt-5 h-11 w-full rounded-2xl border border-card-border bg-black/10" />
-                <div className="mt-3 h-11 w-full rounded-2xl border border-card-border bg-black/10" />
-                <div className="mt-3 h-11 w-2/3 rounded-2xl border border-card-border bg-black/10" />
-                <div className="mt-6 h-12 w-full rounded-full bg-gold/25" />
-                <div className="mt-4 text-center text-xs font-medium tracking-[0.14em] uppercase text-muted">
-                  Loading estimate
+                <div className="mx-auto h-3 w-36 rounded-full bg-white/8" />
+                <div className="mt-5 h-11 w-full rounded-xl bg-white/5" />
+                <div className="mt-3 h-11 w-full rounded-xl bg-white/5" />
+                <div className="mt-3 h-11 w-2/3 rounded-xl bg-white/5" />
+                <div className="mt-6 h-12 w-full rounded-full bg-white/8" />
+                <div className="mt-4 text-center text-[10px] font-medium tracking-widest uppercase text-muted">
+                  Loading
                 </div>
               </div>
             </div>
@@ -112,11 +111,14 @@ export function QuoteIqEmbed({ slug, pageUrl }) {
             src={embedSrc}
             onLoad={() => setLoaded(true)}
             className={[
-              "relative h-[700px] w-full rounded-3xl border border-white/8 bg-black/55 backdrop-blur",
-              "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]",
+              "relative z-0 h-[720px] w-full rounded-none border-0 bg-[#0a0a0b] sm:rounded-[13px]",
+              "[color-scheme:dark]",
               loaded ? "opacity-100" : "opacity-0",
-              "transition-opacity duration-500",
+              "transition-opacity duration-500 ease-out",
             ].join(" ")}
+            style={{
+              filter: "brightness(0.92) contrast(1.02)",
+            }}
             loading="lazy"
             referrerPolicy="strict-origin-when-cross-origin"
             allow="clipboard-write; payment; geolocation"
@@ -139,4 +141,3 @@ export function QuoteIqEmbed({ slug, pageUrl }) {
     </div>
   );
 }
-

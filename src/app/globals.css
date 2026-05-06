@@ -4,6 +4,7 @@
   --background: #050506;
   --foreground: #f6f2ea;
   --muted: #b9b2a6;
+  --font-ui-sans: var(--font-yc-sans), ui-sans-serif, system-ui, sans-serif;
   --card: rgba(255, 255, 255, 0.04);
   --card-border: rgba(255, 255, 255, 0.08);
   --gold: #d6b25e;
@@ -20,15 +21,55 @@
   --color-gold: var(--gold);
   --color-green: var(--green);
   --color-green-bright: var(--green-bright);
-  --font-sans: var(--font-yc-sans);
+  --font-sans: var(--font-ui-sans);
   --font-serif: var(--font-yc-serif);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-yc-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI,
-    Roboto, Arial, sans-serif;
+  font-family: var(--font-ui-sans);
+}
+
+/* Design landing: editorial contrast — readable body, calm vertical rhythm */
+.design-landing {
+  --muted: #d8d1c4;
+  --color-muted: var(--muted);
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+@media (min-width: 1024px) {
+  .design-landing {
+    --muted: #e6dfd4;
+    --color-muted: var(--muted);
+  }
+}
+
+.design-landing .font-serif {
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lux-rotate-hint {
+    animation: none !important;
+  }
+}
+
+@keyframes lux-rotate-hint-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lux-rotate-hint {
+  animation: lux-rotate-hint-in 0.85s ease-out forwards;
+}
+
+.touch-pinch-pan {
+  touch-action: pinch-zoom pan-x pan-y;
 }
 
 ::selection {

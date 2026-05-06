@@ -4,10 +4,10 @@ import { Stagger } from "@/components/motion/Stagger";
 
 export function TrustSection() {
   return (
-    <section id="trust" className="scroll-mt-24 py-22 sm:py-30">
+    <section id="trust" className="scroll-mt-24 py-28 sm:py-36">
       <Container>
-        <div className="relative px-0 sm:px-1">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="relative overflow-hidden rounded-2xl border border-white/6 bg-black/40 p-6 sm:rounded-[22px] sm:p-8 lg:p-10">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between lg:gap-8">
             <div className="relative">
               <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">Trust</div>
               <Reveal
@@ -16,38 +16,38 @@ export function TrustSection() {
               >
                 Trusted by homeowners across Northern Virginia
               </Reveal>
-              <Reveal as="p" className="mt-3 text-base leading-8 text-muted" y={12} duration={0.85}>
+              <Reveal as="p" className="mt-4 max-w-[52ch] text-base font-medium leading-[1.75] text-muted lg:text-[1.125rem] lg:leading-[1.72]" y={12} duration={0.85}>
                 Clean reputation, local proof, and real install results.
               </Reveal>
             </div>
-            <Reveal className="relative flex items-center gap-3 text-sm text-muted" y={10} duration={0.8}>
+            <Reveal className="relative flex items-center gap-3 text-sm font-medium leading-relaxed text-muted lg:text-base" y={10} duration={0.8}>
               <Stars />
-              <span className="text-foreground/85">4.9 average rating</span>
+              <span className="text-foreground">4.9 average rating</span>
             </Reveal>
           </div>
 
-          <Stagger className="relative mt-16 space-y-14" stagger={0.07}>
-            <div data-stagger className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+          <Stagger className="relative mt-24 space-y-20" stagger={0.07}>
+            <div data-stagger className="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-x-16 lg:gap-y-6">
               <TrustShell title="Google Reviews" kicker="Social proof">
                 <div className="flex items-center gap-3">
                   <Stars />
-                  <span className="text-sm text-muted">Live rating and verified review count</span>
+                  <span className="text-sm font-medium text-muted lg:text-[0.9375rem]">Live rating and verified review count</span>
                 </div>
               </TrustShell>
               <TrustShell title="Client identity" kicker="Name + area">
-                <p className="text-sm leading-7 text-muted">
+                <p className="text-sm font-medium leading-7 text-muted lg:text-[0.9375rem] lg:leading-[1.65]">
                   Homeowner name, neighborhood/city, and project type displayed with each review.
                 </p>
               </TrustShell>
             </div>
 
-            <div data-stagger className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+            <div data-stagger className="grid gap-8 md:grid-cols-2 md:gap-10 lg:grid-cols-3 lg:gap-x-12">
               <ReviewCardPlaceholder />
               <ReviewCardPlaceholder />
               <ReviewCardPlaceholder />
             </div>
 
-            <div data-stagger className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+            <div data-stagger className="grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-x-12">
               <PhotoPlaceholder label="Project highlight" />
               <PhotoPlaceholder label="Project highlight" />
               <PhotoPlaceholder label="Project highlight" />
@@ -61,7 +61,7 @@ export function TrustSection() {
 
 function TrustShell({ title, kicker, children }) {
   return (
-    <div className="space-y-4 border-t border-white/8 pt-6">
+    <div className="space-y-5 border-t border-white/[0.09] pt-7">
       <div className="flex items-start justify-between gap-3">
         <div className="text-sm font-semibold tracking-tight text-foreground/95">{title}</div>
         <span className="rounded-full bg-black/20 px-3 py-1 text-[10px] tracking-[0.08em] uppercase text-muted/90">
@@ -75,11 +75,11 @@ function TrustShell({ title, kicker, children }) {
 
 function ReviewCardPlaceholder() {
   return (
-    <div className="space-y-4 border-t border-white/8 pt-6">
-      <p className="text-sm leading-7 text-muted">
+    <div className="space-y-4 border-t border-white/[0.09] pt-7">
+      <p className="text-sm font-medium leading-[1.72] text-muted lg:text-[1.0625rem] lg:leading-[1.72]">
         “Beautiful execution, professional communication, and a result that elevated our entire home.”
       </p>
-      <div className="text-xs tracking-[0.08em] uppercase text-muted/85">
+      <div className="text-xs font-medium tracking-[0.08em] uppercase text-muted/90 lg:text-[13px]">
         Homeowner Name • Northern Virginia
       </div>
     </div>
@@ -88,9 +88,9 @@ function ReviewCardPlaceholder() {
 
 function PhotoPlaceholder({ label }) {
   return (
-    <div className="space-y-3">
-      <div className="aspect-4/3 w-full rounded-2xl border border-white/10 bg-white/3" />
-      <div className="text-[11px] tracking-widest uppercase text-muted/80">{label}</div>
+    <div className="space-y-3.5">
+      <div className="aspect-4/3 w-full rounded-2xl border border-white/[0.11] bg-white/[0.035]" />
+      <div className="text-[11px] tracking-[0.14em] uppercase text-muted/85">{label}</div>
     </div>
   );
 }

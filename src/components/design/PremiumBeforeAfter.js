@@ -28,11 +28,8 @@ export function PremiumBeforeAfter({
     if (!open) return;
     setFullscreenVisible(false);
     const raf = requestAnimationFrame(() => setFullscreenVisible(true));
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     return () => {
       cancelAnimationFrame(raf);
-      document.body.style.overflow = previousOverflow;
     };
   }, [open]);
 
@@ -85,10 +82,9 @@ export function PremiumBeforeAfter({
 
   return (
     <>
-      <div
-        className={cx("relative h-full w-full", className)}
-      >
-        <div className="relative h-full min-h-full w-full">
+      {/* Height must come from `className` (e.g. min-h + h in dvh). Do not add h-full here — it fights explicit vh/dvh and can collapse on mobile. */}
+      <div className={cx("relative w-full", className)}>
+        <div className="relative h-full min-h-0 w-full">
           <BeforeAfterSlider
             beforeUrl={beforeUrl}
             afterUrl={afterUrl}
@@ -98,16 +94,18 @@ export function PremiumBeforeAfter({
             aspect="fill"
             onChange={onChange}
             chromeless
-            className="h-full min-h-full w-full bg-black/0"
+            handleOnlyDrag
+            eagerImages
+            className="h-full min-h-0 w-full bg-black/0"
           />
           {hasAny ? (
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="absolute right-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/35 text-white/90 backdrop-blur-md transition hover:bg-black/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+              className="absolute right-2 top-2 z-30 inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/35 bg-black/55 text-white shadow-[0_8px_32px_-12px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.12)_inset] backdrop-blur-sm transition hover:border-white/45 hover:bg-black/68 sm:right-3 sm:top-3 lg:right-4 lg:top-4 lg:h-16 lg:w-16 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
               aria-label="Open fullscreen comparison"
             >
-              <FullscreenIcon />
+              <FullscreenIcon className="h-7 w-7 sm:h-8 sm:w-8 lg:h-9 lg:w-9" />
             </button>
           ) : null}
         </div>
@@ -116,17 +114,17 @@ export function PremiumBeforeAfter({
       {open ? (
         <div
           className={cx(
-            "fixed inset-0 z-100 bg-black/88 backdrop-blur-md transition-opacity duration-500 ease-in-out",
+            "fixed inset-0 z-100 overscroll-none bg-black/[0.91] backdrop-blur-[2px] transition-opacity duration-500 ease-in-out",
             fullscreenVisible ? "opacity-100" : "opacity-0",
           )}
           role="dialog"
           aria-modal="true"
           aria-label="Fullscreen before and after comparison"
         >
-          <div className="absolute inset-0" onClick={() => setOpen(false)} />
+          <div className="absolute inset-0 z-0" onClick={() => setOpen(false)} />
           <div
             className={cx(
-              "absolute inset-0 transition duration-500 ease-in-out",
+              "absolute inset-0 z-10 transition duration-500 ease-in-out",
               fullscreenVisible ? "scale-100 opacity-100" : "scale-[0.96] opacity-0",
             )}
           >
@@ -139,6 +137,8 @@ export function PremiumBeforeAfter({
               aspect="fill"
               onChange={onChange}
               chromeless
+              handleOnlyDrag
+              allowPinchZoom
               onUserInteract={() => setShowRotateHint(false)}
               className="h-full w-full"
             />
@@ -159,10 +159,10 @@ export function PremiumBeforeAfter({
   );
 }
 
-function FullscreenIcon() {
+function FullscreenIcon({ className = "h-5 w-5" }) {
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-      <path d="M8 4H4v4M16 4h4v4M8 20H4v-4M20 20h-4v-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="M8 4H4v4M16 4h4v4M8 20H4v-4M20 20h-4v-4" stroke="currentColor" strokeWidth="2.05" strokeLinecap="round" />
     </svg>
   );
 }
@@ -178,36 +178,36 @@ function CloseIcon() {
 function RotateHint({ visible }) {
   if (!visible) return null;
   return (
-    <div className="pointer-events-none absolute bottom-6 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/12 bg-black/55 px-3.5 py-1.5 text-[10px] font-medium tracking-[0.16em] text-white/75 opacity-80 backdrop-blur-md shadow-[0_18px_45px_-28px_rgba(0,0,0,0.9)] transition-opacity duration-250 md:hidden">
-      <span className="mr-1.5 inline-flex h-3.5 w-3.5 items-center justify-center">
-        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
+    <div className="lux-rotate-hint pointer-events-none absolute bottom-24 left-1/2 z-30 flex -translate-x-1/2 items-center rounded-full border border-white/22 bg-black/65 px-5 py-2.5 text-[12px] font-semibold tracking-[0.12em] text-white shadow-[0_20px_50px_-28px_rgba(0,0,0,0.92),0_0_0_1px_rgba(255,255,255,0.1)_inset] backdrop-blur-sm sm:bottom-28 sm:px-6 sm:text-[13px] md:hidden">
+      <span className="mr-2.5 inline-flex h-5 w-5 shrink-0 items-center justify-center sm:h-6 sm:w-6">
+        <svg viewBox="0 0 24 24" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" aria-hidden="true">
           <path
             d="M7 4h10a3 3 0 0 1 3 3v3"
             stroke="currentColor"
-            strokeWidth="1.6"
+            strokeWidth="1.85"
             strokeLinecap="round"
           />
           <path
             d="M17 20H7a3 3 0 0 1-3-3v-3"
             stroke="currentColor"
-            strokeWidth="1.6"
+            strokeWidth="1.85"
             strokeLinecap="round"
           />
           <path
             d="M5 7 3.5 5.5 2 7"
             stroke="currentColor"
-            strokeWidth="1.4"
+            strokeWidth="1.55"
             strokeLinecap="round"
           />
           <path
             d="M19 17 20.5 18.5 22 17"
             stroke="currentColor"
-            strokeWidth="1.4"
+            strokeWidth="1.55"
             strokeLinecap="round"
           />
         </svg>
       </span>
-      <span>Rotate for full view</span>
+      <span className="text-white/95">Rotate for full view</span>
     </div>
   );
 }

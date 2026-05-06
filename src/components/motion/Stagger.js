@@ -26,11 +26,10 @@ export function Stagger({
 
       gsap.fromTo(
         items,
-        { opacity: 0, y, filter: "blur(6px)" },
+        { opacity: 0, y },
         {
           opacity: 1,
           y: 0,
-          filter: "blur(0px)",
           duration,
           ease: "power3.out",
           stagger,
