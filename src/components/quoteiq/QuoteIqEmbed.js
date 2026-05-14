@@ -36,7 +36,9 @@ export function QuoteIqEmbed({ slug, pageUrl }) {
   const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
-    setTimestamp(new Date().toISOString());
+    queueMicrotask(() => {
+      setTimestamp(new Date().toISOString());
+    });
   }, []);
 
   const embedSrc = useMemo(() => {
@@ -45,11 +47,14 @@ export function QuoteIqEmbed({ slug, pageUrl }) {
   }, [pageUrl, slug, timestamp]);
 
   useEffect(() => {
-    setLoaded(false);
-    setTimedOut(false);
+    let t = 0;
+    queueMicrotask(() => {
+      setLoaded(false);
+      setTimedOut(false);
+    });
 
     if (!embedSrc) return;
-    const t = setTimeout(() => setTimedOut(true), 12000);
+    t = window.setTimeout(() => setTimedOut(true), 12000);
     return () => clearTimeout(t);
   }, [embedSrc]);
 
@@ -84,16 +89,16 @@ export function QuoteIqEmbed({ slug, pageUrl }) {
   }
 
   return (
-    <div className="relative rounded-none border-0 bg-[#060607] p-0 shadow-[0_28px_80px_-40px_rgba(0,0,0,0.75),0_0_0_1px_rgba(0,0,0,0.45)_inset] sm:rounded-[28px] sm:border sm:border-white/[0.08] sm:p-px">
+    <div className="touch-pan-y-safe relative rounded-none border-0 bg-[#060607] p-0 shadow-[0_28px_80px_-40px_rgba(0,0,0,0.75),0_0_0_1px_rgba(0,0,0,0.45)_inset] sm:rounded-[28px] sm:border sm:border-white/[0.08] sm:p-px">
       <div className="pointer-events-none absolute inset-0 rounded-none bg-[linear-gradient(165deg,rgba(214,178,94,0.06),transparent_42%,rgba(31,122,58,0.04)_88%)] sm:rounded-[28px]" />
-      <div className="relative rounded-none bg-[#08090a] py-6 px-1 sm:rounded-[27px] sm:p-8">
+      <div className="touch-pan-y-safe relative rounded-none bg-[#08090a] py-6 px-1 sm:rounded-[27px] sm:p-8">
         <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-none sm:rounded-[27px]">
           <div className="absolute -right-16 -top-16 h-[200px] w-[200px] rounded-full bg-green/6 blur-3xl" />
           <div className="absolute -bottom-20 -left-16 h-[220px] w-[220px] rounded-full bg-gold/5 blur-3xl" />
         </div>
-        <div className="relative overflow-hidden rounded-none bg-[#030304] py-1.5 px-0 ring-0 sm:rounded-[20px] sm:p-1.5 sm:ring-1 sm:ring-white/[0.12]">
+        <div className="touch-pan-y-safe relative overflow-x-hidden overflow-y-visible rounded-none bg-[#030304] py-1.5 px-0 ring-0 sm:rounded-[20px] sm:p-1.5 sm:ring-1 sm:ring-white/[0.12]">
           {!loaded ? (
-            <div className="absolute inset-0 z-10 grid place-items-center rounded-none bg-[#040405]/94 sm:rounded-[14px]">
+            <div className="touch-pan-y-safe absolute inset-0 z-10 grid place-items-center rounded-none bg-[#040405]/94 sm:rounded-[14px]">
               <div className="w-full max-w-xl px-6 py-10">
                 <div className="mx-auto h-3 w-36 rounded-full bg-white/8" />
                 <div className="mt-5 h-11 w-full rounded-xl bg-white/5" />
@@ -111,7 +116,7 @@ export function QuoteIqEmbed({ slug, pageUrl }) {
             src={embedSrc}
             onLoad={() => setLoaded(true)}
             className={[
-              "relative z-0 h-[720px] w-full rounded-none border-0 bg-[#0a0a0b] sm:rounded-[13px]",
+              "touch-pan-y-safe relative z-0 h-[720px] w-full rounded-none border-0 bg-[#0a0a0b] sm:rounded-[13px]",
               "[color-scheme:dark]",
               loaded ? "opacity-100" : "opacity-0",
               "transition-opacity duration-500 ease-out",

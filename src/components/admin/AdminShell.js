@@ -98,7 +98,7 @@ export function AdminShell({ title, children }) {
               <div className="text-xs text-muted">Exclusive admin dashboard</div>
             </div>
             <div className="lg:hidden flex items-center gap-2">
-              <Logo />
+              <Logo variant="icon" className="h-9 w-9" />
               <span className="text-sm font-semibold tracking-tight text-foreground">
                 Admin
               </span>

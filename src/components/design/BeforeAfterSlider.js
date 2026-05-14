@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 function clamp(n, min, max) {
   return Math.min(max, Math.max(min, n));
@@ -9,6 +9,10 @@ function clamp(n, min, max) {
 function dist2(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
+
+/** Fullscreen inspect: pinch can zoom out slightly below 1; wheel uses same bounds. */
+const INSPECT_SCALE_MIN = 0.65;
+const INSPECT_SCALE_MAX = 4;
 
 export function BeforeAfterSlider({
   beforeUrl,
@@ -34,12 +38,43 @@ export function BeforeAfterSlider({
   const rootRef = useRef(null);
   const zoomLayerRef = useRef(null);
   const draggingRef = useRef(false);
+  const windowDragCleanupRef = useRef(null);
   const pct = useMemo(() => clamp(value, 0, 100), [value]);
+
+  function cleanupWindowDragListeners() {
+    windowDragCleanupRef.current?.();
+    windowDragCleanupRef.current = null;
+  }
+
+  /** Ensures drag ends if pointerup/cancel fires outside the slider (capture quirks, iOS, etc.). */
+  function armWindowDragListeners(pointerId, captureTarget) {
+    cleanupWindowDragListeners();
+    if (typeof window === "undefined") return;
+    const fn = (ev) => {
+      if (ev.pointerId !== pointerId) return;
+      draggingRef.current = false;
+      cleanupWindowDragListeners();
+      try {
+        captureTarget.releasePointerCapture?.(pointerId);
+      } catch {
+        /* ignore */
+      }
+    };
+    window.addEventListener("pointerup", fn, true);
+    window.addEventListener("pointercancel", fn, true);
+    windowDragCleanupRef.current = () => {
+      window.removeEventListener("pointerup", fn, true);
+      window.removeEventListener("pointercancel", fn, true);
+    };
+  }
 
   const isInspectMode = Boolean(handleOnlyDrag && allowPinchZoom);
   const [inspect, setInspect] = useState({ s: 1, x: 0, y: 0 });
   const inspectRef = useRef(inspect);
-  inspectRef.current = inspect;
+
+  useLayoutEffect(() => {
+    inspectRef.current = inspect;
+  }, [inspect]);
 
   const pointersRef = useRef(new Map());
   const pinchRef = useRef(null);
@@ -59,12 +94,29 @@ export function BeforeAfterSlider({
   }, [pct, onChange]);
 
   useEffect(() => {
-    setValue(clamp(Number(initial) || 50, 0, 100));
+    return () => {
+      cleanupWindowDragListeners();
+      draggingRef.current = false;
+    };
+  }, []);
+
+  /** Sync external `initial` without fighting an active drag (avoids parent echo loops, e.g. PremiumBeforeAfter). */
+  useEffect(() => {
+    if (draggingRef.current) return;
+    const n = Number(initial);
+    const next = Number.isFinite(n) ? clamp(n, 0, 100) : 50;
+    queueMicrotask(() => {
+      if (draggingRef.current) return;
+      setValue((prev) => (Math.abs(prev - next) < 0.05 ? prev : next));
+    });
   }, [initial]);
 
   function setFromClientX(clientX) {
-    const el = rootRef.current;
-    if (!el) return;
+    const root = rootRef.current;
+    if (!root) return;
+    const surface =
+      isInspectMode ? root.querySelector("[data-ba-compare-surface]") : null;
+    const el = surface instanceof HTMLElement ? surface : root;
     const rect = el.getBoundingClientRect();
     if (!rect.width) return;
     const next = ((clientX - rect.left) / rect.width) * 100;
@@ -74,9 +126,9 @@ export function BeforeAfterSlider({
   function onTrackPointerDown(e) {
     if (!allowDrag || handleOnlyDrag) return;
     onUserInteract?.();
-    e.preventDefault?.();
     draggingRef.current = true;
     e.currentTarget.setPointerCapture?.(e.pointerId);
+    armWindowDragListeners(e.pointerId, e.currentTarget);
     setFromClientX(e.clientX);
   }
 
@@ -84,14 +136,18 @@ export function BeforeAfterSlider({
     if (!allowDrag || handleOnlyDrag) return;
     if (!draggingRef.current) return;
     onUserInteract?.();
-    e.preventDefault?.();
     setFromClientX(e.clientX);
   }
 
   function onTrackPointerUp(e) {
     if (!allowDrag || handleOnlyDrag) return;
+    cleanupWindowDragListeners();
     draggingRef.current = false;
-    e.currentTarget.releasePointerCapture?.(e.pointerId);
+    try {
+      e.currentTarget.releasePointerCapture?.(e.pointerId);
+    } catch {
+      /* ignore */
+    }
   }
 
   function clearInspectPointers() {
@@ -120,7 +176,8 @@ export function BeforeAfterSlider({
         s0: inspectRef.current.s,
       };
       panRef.current = null;
-    } else if (pointersRef.current.size === 1 && inspectRef.current.s > 1.02) {
+    } else if (pointersRef.current.size === 1) {
+      // One-finger pan at any zoom (including 1×) — divider never moves from image touches.
       panRef.current = {
         cx: e.clientX,
         cy: e.clientY,
@@ -129,7 +186,7 @@ export function BeforeAfterSlider({
       };
       pinchRef.current = null;
     }
-    e.preventDefault();
+    if (pointersRef.current.size >= 2) e.preventDefault();
   }
 
   function onInspectPointerMove(e) {
@@ -143,7 +200,7 @@ export function BeforeAfterSlider({
       const { d0, s0 } = pinchRef.current;
       if (d0 > 4) {
         const ratio = d / d0;
-        const s = clamp(s0 * ratio, 1, 4);
+        const s = clamp(s0 * ratio, INSPECT_SCALE_MIN, INSPECT_SCALE_MAX);
         setInspectBoth({ ...inspectRef.current, s });
       }
     } else if (pointersRef.current.size === 1 && panRef.current) {
@@ -154,7 +211,7 @@ export function BeforeAfterSlider({
         y: p.oy + (e.clientY - p.cy),
       });
     }
-    e.preventDefault();
+    if (pointersRef.current.size >= 2) e.preventDefault();
   }
 
   function onInspectPointerUp(e) {
@@ -180,30 +237,22 @@ export function BeforeAfterSlider({
       if (!ev.ctrlKey && !ev.metaKey) return;
       ev.preventDefault();
       const cur = inspectRef.current;
-      const nextS = clamp(cur.s + -ev.deltaY * 0.009, 1, 4);
+      const nextS = clamp(cur.s + -ev.deltaY * 0.009, INSPECT_SCALE_MIN, INSPECT_SCALE_MAX);
       setInspectBoth({ ...cur, s: nextS });
     }
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, [isInspectMode]);
 
-  const trackTouchClass =
-    handleOnlyDrag || isInspectMode ? "touch-none" : "touch-none";
+  const trackTouchClass = isInspectMode ? "touch-pinch-pan" : "touch-pan-y-safe";
 
   function onHandlePointerDown(e) {
     if (!allowDrag || !hasBefore || !hasAfter) return;
     onUserInteract?.();
-    if (isInspectMode) {
-      const v = inspectRef.current;
-      if (v.s > 1.02 || Math.abs(v.x) > 1.5 || Math.abs(v.y) > 1.5) {
-        setInspectBoth({ s: 1, x: 0, y: 0 });
-        clearInspectPointers();
-      }
-    }
-    e.preventDefault?.();
     e.stopPropagation();
     draggingRef.current = true;
     e.currentTarget.setPointerCapture?.(e.pointerId);
+    armWindowDragListeners(e.pointerId, e.currentTarget);
     setFromClientX(e.clientX);
   }
 
@@ -211,14 +260,30 @@ export function BeforeAfterSlider({
     if (!allowDrag || !hasBefore || !hasAfter) return;
     if (!draggingRef.current) return;
     onUserInteract?.();
-    e.preventDefault?.();
     setFromClientX(e.clientX);
   }
 
   function onHandlePointerUp(e) {
-    if (!draggingRef.current) return;
+    cleanupWindowDragListeners();
+    if (!draggingRef.current) {
+      try {
+        e.currentTarget.releasePointerCapture?.(e.pointerId);
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
     draggingRef.current = false;
-    e.currentTarget.releasePointerCapture?.(e.pointerId);
+    try {
+      e.currentTarget.releasePointerCapture?.(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function onDragLostPointerCapture() {
+    cleanupWindowDragListeners();
+    draggingRef.current = false;
   }
 
   const comparisonInner = (
@@ -271,13 +336,14 @@ export function BeforeAfterSlider({
             aria-valuemin={0}
             aria-valuemax={100}
             className={[
-              handleOnlyDrag ? "pointer-events-auto touch-none" : "pointer-events-none",
+              handleOnlyDrag ? "pointer-events-auto touch-manipulation" : "pointer-events-none",
               "absolute left-1/2 top-1/2 h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/28 bg-black/45 shadow-[0_8px_28px_-18px_rgba(0,0,0,0.9)] backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 sm:h-12 sm:w-12",
             ].join(" ")}
             onPointerDown={handleOnlyDrag ? onHandlePointerDown : undefined}
             onPointerMove={handleOnlyDrag ? onHandlePointerMove : undefined}
             onPointerUp={handleOnlyDrag ? onHandlePointerUp : undefined}
             onPointerCancel={handleOnlyDrag ? onHandlePointerUp : undefined}
+            onLostPointerCapture={handleOnlyDrag ? onDragLostPointerCapture : undefined}
           >
             <span className="absolute inset-0 grid place-items-center text-white/85">
               <HandleArrows />
@@ -314,24 +380,26 @@ export function BeforeAfterSlider({
         onPointerMove={handleOnlyDrag ? undefined : onTrackPointerMove}
         onPointerUp={handleOnlyDrag ? undefined : onTrackPointerUp}
         onPointerCancel={handleOnlyDrag ? undefined : onTrackPointerUp}
+        onLostPointerCapture={handleOnlyDrag ? undefined : onDragLostPointerCapture}
       >
         {hasAny ? (
           <>
             {isInspectMode ? (
               <div
                 ref={zoomLayerRef}
-                className="absolute inset-0 h-full w-full"
+                className="touch-pinch-pan absolute inset-0 h-full w-full"
                 style={{
                   transform: `translate(${inspect.x}px, ${inspect.y}px) scale(${inspect.s})`,
                   transformOrigin: "50% 50%",
-                  touchAction: "none",
                 }}
                 onPointerDown={onInspectPointerDown}
                 onPointerMove={onInspectPointerMove}
                 onPointerUp={onInspectPointerUp}
                 onPointerCancel={onInspectPointerUp}
               >
-                <div className="relative h-full w-full">{comparisonInner}</div>
+                <div className="relative h-full w-full" data-ba-compare-surface>
+                  {comparisonInner}
+                </div>
               </div>
             ) : (
               <div className="relative h-full w-full">{comparisonInner}</div>

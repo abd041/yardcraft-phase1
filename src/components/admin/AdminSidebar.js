@@ -65,8 +65,8 @@ export function AdminSidebar({ onNavigate } = {}) {
 
       <div className="relative px-6 pt-6 pb-5">
         <div className="flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-2xl border border-card-border bg-black/10">
-            <Logo />
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-card-border bg-black/10">
+            <Logo variant="icon" />
           </div>
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold tracking-tight text-foreground">

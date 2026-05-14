@@ -72,6 +72,11 @@ body {
   touch-action: pinch-zoom pan-x pan-y;
 }
 
+/* Large embeds / hero media: let the browser handle vertical scroll; pointer events still reach children. */
+.touch-pan-y-safe {
+  touch-action: pan-y;
+}
+
 ::selection {
   background: color-mix(in oklab, var(--gold) 35%, transparent);
 }

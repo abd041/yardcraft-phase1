@@ -1,3 +1,5 @@
+import { BRAND } from "@/lib/brand";
+
 export const landingContent = {
   nav: [
     { href: "#services", label: "Services" },
@@ -5,7 +7,7 @@ export const landingContent = {
     { href: "#trust", label: "Trust" },
   ],
   hero: {
-    eyebrow: "YardCraft • Outdoor living",
+    eyebrow: `${BRAND.name} · ${BRAND.tagline}`,
     title: "Luxury landscaping that makes the whole home feel premium.",
     subtitle:
       "High-contrast modern design, premium materials, and lighting that performs after sunset. Built clean. Scheduled fast. Finished like it should’ve been done the first time.",

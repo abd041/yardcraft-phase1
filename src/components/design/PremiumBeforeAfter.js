@@ -1,10 +1,33 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { BeforeAfterSlider } from "@/components/design/BeforeAfterSlider";
 
 function cx(...parts) {
   return parts.filter(Boolean).join(" ");
+}
+
+function subscribePortraitMobileHint(onStoreChange) {
+  if (typeof window === "undefined") return () => {};
+  const mql = window.matchMedia("(orientation: portrait)");
+  mql.addEventListener("change", onStoreChange);
+  window.addEventListener("resize", onStoreChange);
+  return () => {
+    mql.removeEventListener("change", onStoreChange);
+    window.removeEventListener("resize", onStoreChange);
+  };
+}
+
+function getPortraitMobileHintSnapshot() {
+  if (typeof window === "undefined") return false;
+  const isMobile = window.innerWidth < 768;
+  const mql = window.matchMedia?.("(orientation: portrait)");
+  const isPortrait = mql?.matches ?? window.innerHeight >= window.innerWidth;
+  return isMobile && isPortrait;
+}
+
+function getPortraitMobileHintServerSnapshot() {
+  return false;
 }
 
 export function PremiumBeforeAfter({
@@ -18,16 +41,27 @@ export function PremiumBeforeAfter({
   const [open, setOpen] = useState(false);
   const [fullscreenVisible, setFullscreenVisible] = useState(false);
   const [value, setValue] = useState(Number(initial) || 52);
-  const [showRotateHint, setShowRotateHint] = useState(false);
+  const portraitMobileHint = useSyncExternalStore(
+    subscribePortraitMobileHint,
+    getPortraitMobileHintSnapshot,
+    getPortraitMobileHintServerSnapshot,
+  );
+  const showRotateHint = open && portraitMobileHint;
 
   const hasAny = Boolean(beforeUrl || afterUrl);
 
   const onChange = useCallback((pct) => setValue(pct), []);
 
   useEffect(() => {
-    if (!open) return;
-    setFullscreenVisible(false);
-    const raf = requestAnimationFrame(() => setFullscreenVisible(true));
+    if (!open) {
+      queueMicrotask(() => setFullscreenVisible(false));
+      return;
+    }
+    let raf = 0;
+    queueMicrotask(() => {
+      setFullscreenVisible(false);
+      raf = requestAnimationFrame(() => setFullscreenVisible(true));
+    });
     return () => {
       cancelAnimationFrame(raf);
     };
@@ -42,48 +76,10 @@ export function PremiumBeforeAfter({
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  useEffect(() => {
-    if (!open) {
-      setShowRotateHint(false);
-      return;
-    }
-
-    function computeShouldShow() {
-      if (typeof window === "undefined") return false;
-      const isMobile = window.innerWidth < 768;
-      const mql = window.matchMedia?.("(orientation: portrait)");
-      const isPortrait = mql?.matches ?? window.innerHeight >= window.innerWidth;
-      return isMobile && isPortrait;
-    }
-
-    if (!computeShouldShow()) {
-      setShowRotateHint(false);
-      return;
-    }
-
-    setShowRotateHint(true);
-    const hideTimer = setTimeout(() => setShowRotateHint(false), 2600);
-
-    const mql = window.matchMedia?.("(orientation: portrait)");
-    function handleOrientationChange() {
-      if (!computeShouldShow()) {
-        setShowRotateHint(false);
-      }
-    }
-    mql?.addEventListener?.("change", handleOrientationChange);
-    window.addEventListener("resize", handleOrientationChange);
-
-    return () => {
-      clearTimeout(hideTimer);
-      mql?.removeEventListener?.("change", handleOrientationChange);
-      window.removeEventListener("resize", handleOrientationChange);
-    };
-  }, [open]);
-
   return (
     <>
       {/* Height must come from `className` (e.g. min-h + h in dvh). Do not add h-full here — it fights explicit vh/dvh and can collapse on mobile. */}
-      <div className={cx("relative w-full", className)}>
+      <div className={cx("touch-pan-y-safe relative w-full", className)}>
         <div className="relative h-full min-h-0 w-full">
           <BeforeAfterSlider
             beforeUrl={beforeUrl}
@@ -102,10 +98,10 @@ export function PremiumBeforeAfter({
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="absolute right-2 top-2 z-30 inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/35 bg-black/55 text-white shadow-[0_8px_32px_-12px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.12)_inset] backdrop-blur-sm transition hover:border-white/45 hover:bg-black/68 sm:right-3 sm:top-3 lg:right-4 lg:top-4 lg:h-16 lg:w-16 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+              className="absolute bottom-4 right-4 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/35 bg-black/60 text-white shadow-[0_10px_36px_-14px_rgba(0,0,0,0.88),0_0_0_1px_rgba(255,255,255,0.12)_inset] backdrop-blur-sm transition hover:border-white/48 hover:bg-black/72 sm:bottom-5 sm:right-5 sm:h-14 sm:w-14 lg:bottom-6 lg:right-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
               aria-label="Open fullscreen comparison"
             >
-              <FullscreenIcon className="h-7 w-7 sm:h-8 sm:w-8 lg:h-9 lg:w-9" />
+              <FullscreenIcon className="h-6 w-6 sm:h-7 sm:w-7" />
             </button>
           ) : null}
         </div>
@@ -114,7 +110,7 @@ export function PremiumBeforeAfter({
       {open ? (
         <div
           className={cx(
-            "fixed inset-0 z-100 overscroll-none bg-black/[0.91] backdrop-blur-[2px] transition-opacity duration-500 ease-in-out",
+            "fixed inset-0 z-100 overscroll-y-auto bg-black/[0.91] backdrop-blur-[2px] transition-opacity duration-500 ease-in-out",
             fullscreenVisible ? "opacity-100" : "opacity-0",
           )}
           role="dialog"
@@ -139,7 +135,6 @@ export function PremiumBeforeAfter({
               chromeless
               handleOnlyDrag
               allowPinchZoom
-              onUserInteract={() => setShowRotateHint(false)}
               className="h-full w-full"
             />
           </div>
@@ -162,7 +157,14 @@ export function PremiumBeforeAfter({
 function FullscreenIcon({ className = "h-5 w-5" }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
-      <path d="M8 4H4v4M16 4h4v4M8 20H4v-4M20 20h-4v-4" stroke="currentColor" strokeWidth="2.05" strokeLinecap="round" />
+      {/* Four matching corner brackets (outward “expand”) — stroke order avoids a flipped corner. */}
+      <path
+        d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

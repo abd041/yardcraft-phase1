@@ -1,6 +1,8 @@
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
 
+import { BRAND } from "@/lib/brand";
+
 // Manrope: body / UI / buttons / labels — pairs with Cormorant Garamond for editorial luxury.
 const ycSans = Manrope({
   variable: "--font-yc-sans",
@@ -21,8 +23,7 @@ export const metadata = {
     default: "YardCraft",
     template: "%s • YardCraft",
   },
-  description:
-    "Luxury landscaping and outdoor living transformations across Northern Virginia.",
+  description: `${BRAND.tagline}. Luxury landscaping and outdoor living transformations across Northern Virginia.`,
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
 };
 

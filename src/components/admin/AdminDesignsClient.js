@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/Button";
@@ -69,8 +69,10 @@ function sortDesigns(designs, sortKey) {
 
 export function AdminDesignsClient({ initialDesigns }) {
   const searchParams = useSearchParams();
+  const slugFromUrl = useMemo(() => normalizeSlug(searchParams.get("slug")), [searchParams]);
   const [query, setQuery] = useState("");
-  const [selectedSlug, setSelectedSlug] = useState("");
+  const [manualSlug, setManualSlug] = useState("");
+  const selectedSlug = slugFromUrl || manualSlug;
   const [designs, setDesigns] = useState(Array.isArray(initialDesigns) ? initialDesigns : []);
   const [busy, setBusy] = useState(null);
   const [error, setError] = useState("");
@@ -90,11 +92,6 @@ export function AdminDesignsClient({ initialDesigns }) {
   function removeToast(id) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }
-
-  useEffect(() => {
-    const slug = normalizeSlug(searchParams.get("slug"));
-    if (slug) setSelectedSlug(slug);
-  }, [searchParams]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -218,7 +215,7 @@ export function AdminDesignsClient({ initialDesigns }) {
         if (exists) return prev;
         return [next, ...prev];
       });
-      setSelectedSlug(next.slug);
+      setManualSlug(next.slug);
       setCreateSlug("");
       pushToast({ type: "success", title: "Slug created", message: next.slug });
     } catch (e) {
@@ -347,7 +344,7 @@ export function AdminDesignsClient({ initialDesigns }) {
                   data-stagger
                   key={d.slug}
                   type="button"
-                  onClick={() => setSelectedSlug(d.slug)}
+                  onClick={() => setManualSlug(d.slug)}
                   className={cx(
                     "w-full rounded-3xl border px-3 py-3 text-left transition",
                     active

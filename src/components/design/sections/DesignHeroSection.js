@@ -120,7 +120,7 @@ export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
                 </div>
               </div>
               <div className="hidden sm:block">
-                <Logo />
+                <Logo variant="mark" />
               </div>
             </div>
 

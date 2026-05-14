@@ -9,7 +9,7 @@ import { BRAND } from "@/lib/brand";
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-card-border/70 bg-background/75 backdrop-blur">
-      <Container className="flex h-16 items-center justify-between">
+      <Container className="flex min-h-[3.5rem] items-center justify-between gap-3 py-2.5 sm:min-h-16 sm:py-3">
         <Logo />
         <div className="flex items-center gap-3">
           <nav className="hidden items-center gap-5 md:flex">

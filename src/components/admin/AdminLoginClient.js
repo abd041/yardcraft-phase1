@@ -60,7 +60,7 @@ export function AdminLoginClient() {
       <Container className="relative flex min-h-screen items-center justify-center py-10">
         <div className="w-full max-w-md">
           <div className="flex items-center justify-center">
-            <Logo />
+            <Logo variant="auth" />
           </div>
 
           <div className="mt-6 rounded-3xl border border-card-border bg-card p-6 sm:p-8">

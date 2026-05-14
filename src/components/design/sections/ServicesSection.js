@@ -40,13 +40,13 @@ export function ServicesSection() {
               <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">Services</div>
               <Reveal
                 as="h2"
-                className="mt-2 font-serif text-pretty text-4xl font-semibold leading-[1.1] tracking-[-0.01em] text-foreground sm:text-5xl"
+                className="mt-3 max-w-[20ch] font-sans text-[1.625rem] font-medium leading-[1.18] tracking-[-0.04em] text-foreground sm:mt-3.5 sm:max-w-[24ch] sm:text-[1.875rem] sm:leading-[1.14] lg:text-[2rem] lg:leading-[1.12]"
               >
-                From refresh to full outdoor transformation.
+                Complete outdoor care.
               </Reveal>
               <Reveal
                 as="p"
-                className="mt-6 max-w-[64ch] text-sm font-medium leading-[1.72] text-muted sm:text-base sm:leading-[1.7] lg:text-[1.125rem] lg:leading-[1.72] xl:text-[1.14rem]"
+                className="mt-4 max-w-[64ch] text-sm font-medium leading-[1.72] text-muted sm:mt-5 sm:text-base sm:leading-[1.7] lg:text-[1.125rem] lg:leading-[1.72] xl:text-[1.14rem]"
                 y={12}
                 duration={0.85}
               >
