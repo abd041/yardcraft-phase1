@@ -1,133 +1,64 @@
+import Image from "next/image";
+
 import { Container } from "@/components/ui/Container";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { BRAND } from "@/lib/brand";
-import { QuoteIqEmbed } from "@/components/quoteiq/QuoteIqEmbed";
 
 export function Hero({ content }) {
   return (
-    <section className="relative">
-      <Container className="pt-10 pb-12 sm:pt-16 sm:pb-16">
-        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-          <div className="flex flex-col items-start gap-6">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge className="text-foreground/85">{content.eyebrow}</Badge>
-              <span className="rounded-full border border-card-border bg-black/10 px-3 py-1 text-[11px] font-medium tracking-wide text-muted">
-                Licensed • Insured • Local
-              </span>
-              <span className="rounded-full border border-card-border bg-black/10 px-3 py-1 text-[11px] font-medium tracking-wide text-muted">
-                Premium finish • Clean install
-              </span>
-            </div>
+    <section className="relative flex min-h-[92vh] items-end overflow-hidden pb-20 sm:min-h-screen sm:items-center sm:pb-0">
+      {/* Background image */}
+      <div className="absolute inset-0">
+        <Image
+          src="/images/hero-bg.png"
+          alt="Premium outdoor landscaping by YardCraft"
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        {/* Cinematic overlay: heavy on left for text legibility, reveals scene on right */}
+        <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(0,0,0,0.88)_0%,rgba(0,0,0,0.72)_38%,rgba(0,0,0,0.35)_65%,rgba(0,0,0,0.12)_100%)]" />
+        {/* Bottom vignette for depth */}
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-[linear-gradient(to_top,rgba(5,5,6,0.85),transparent)]" />
+        {/* Top vignette */}
+        <div className="absolute inset-x-0 top-0 h-32 bg-[linear-gradient(to_bottom,rgba(5,5,6,0.45),transparent)]" />
+        {/* Warm amber glow — simulates landscape lighting reflecting on scene */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_68%_62%,rgba(214,160,60,0.12),transparent_60%)]" />
+      </div>
 
-            <h1 className="font-serif text-balance text-4xl font-semibold leading-[0.98] tracking-[-0.02em] text-foreground sm:text-6xl">
-              <span className="block">See your yard</span>
-              <span className="block">
-                transformed{" "}
-                <span className="bg-[linear-gradient(90deg,color-mix(in_oklab,var(--green-bright)_75%,white),var(--green))] bg-clip-text text-transparent">
-                  instantly
-                </span>
-                .
-              </span>
-            </h1>
-            <p className="max-w-[62ch] text-pretty text-base leading-7 text-muted sm:text-lg sm:leading-8">
-              Luxury landscaping + outdoor living, designed for dark premium curb appeal: crisp
-              borders, premium stone, and lighting that makes your home look expensive after
-              sunset.
-            </p>
+      <Container className="relative z-10 py-24 sm:py-28 lg:py-36">
+        <div className="max-w-[560px]">
+          {/* Eyebrow */}
+          <p className="mb-5 text-[11px] font-semibold tracking-[0.2em] uppercase text-foreground/60 sm:text-xs">
+            {content.eyebrow}
+          </p>
 
-            <div className="grid w-full gap-3 sm:grid-cols-[1fr_1fr] sm:gap-4">
-              <Button href={content.primaryCta.href} className="w-full justify-center">
-                {content.primaryCta.label}
-              </Button>
-              <a
-                href={`tel:${BRAND.phoneTel}`}
-                className="inline-flex items-center justify-center rounded-full border border-white/35 bg-white/10 px-6 py-3.5 text-[13px] font-semibold tracking-[0.04em] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition hover:border-white/50 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              >
-                Call Now
-              </a>
-            </div>
+          {/* Headline */}
+          <h1 className="font-serif text-[3.25rem] font-semibold leading-[0.94] tracking-[-0.025em] text-foreground sm:text-[4.5rem] lg:text-[5.25rem]">
+            Premium Outdoor
+            <br />
+            Transformations
+          </h1>
 
-            <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-              <Button
-                variant="secondary"
-                href="#services"
-                className="w-full justify-center sm:w-auto"
-              >
-                Explore services
-              </Button>
-              <div className="text-xs text-muted sm:text-sm">
-                No-pressure consult. Clear scope. Premium finish.
-              </div>
-            </div>
+          {/* Subtitle */}
+          <p className="mt-6 max-w-[46ch] text-pretty text-[15px] leading-[1.75] text-foreground/65 sm:text-base sm:leading-[1.8]">
+            {content.subtitle}
+          </p>
 
-            <div className="grid w-full gap-3 sm:grid-cols-3">
-              <Kpi title="On-site consult" value="Fast" body="Book in 48 hours" />
-              <Kpi title="Premium finish" value="Clean" body="Lighting + borders" />
-              <Kpi title="Project clarity" value="Clear" body="Scope + timeline" />
-            </div>
-          </div>
-
-          <div
-            id="quote"
-            className="relative overflow-hidden rounded-3xl border border-card-border bg-card p-6 sm:p-8"
-          >
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute -right-24 -top-24 h-[280px] w-[280px] rounded-full bg-green/10 blur-3xl" />
-              <div className="absolute -left-24 bottom-[-140px] h-[340px] w-[340px] rounded-full bg-gold/10 blur-3xl" />
-              <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.22),transparent_58%)]" />
-            </div>
-
-            <div className="relative text-xs font-medium tracking-[0.14em] uppercase text-muted">
-              Instant estimate
-            </div>
-            <h2 className="mt-2 font-serif text-xl font-semibold leading-[1.05] tracking-[-0.01em] text-foreground sm:text-2xl">
-              Get pricing & timeline today.
-            </h2>
-            <p className="mt-2 max-w-[62ch] text-sm leading-6 text-muted">
-              Answer a few quick questions to get a fast budget range.
-            </p>
-
-            <div className="mt-4">
-              <QuoteIqEmbed slug="home" pageUrl="" />
-            </div>
-
-            <div className="mt-4 grid gap-2">
-              <Button href={content.primaryCta.href} className="w-full justify-center">
-                Request Your Custom Plan
-              </Button>
-              <a
-                href={`tel:${BRAND.phoneTel}`}
-                className="inline-flex items-center justify-center rounded-full border border-white/35 bg-white/10 px-6 py-3.5 text-[13px] font-semibold tracking-[0.04em] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition hover:border-white/50 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              >
-                Call Now
-              </a>
-              <div className="text-center text-xs text-muted">
-                Prefer text? Add SMS link here when ready.
-              </div>
-            </div>
-
-            <div className="relative mt-4 rounded-2xl border border-card-border bg-black/10 px-4 py-3 text-xs text-muted">
-              Typical turnaround: <span className="text-foreground">48-hour consult</span> •{" "}
-              <span className="text-foreground">clear scope</span> •{" "}
-              <span className="text-foreground">premium finish</span>
-            </div>
+          {/* CTAs */}
+          <div className="mt-8 flex flex-wrap gap-3 sm:gap-4">
+            <Button href={content.primaryCta.href} className="px-6 py-3.5 text-[13px]">
+              {content.primaryCta.label}
+            </Button>
+            <a
+              href={`tel:${BRAND.phoneTel}`}
+              className="inline-flex items-center justify-center rounded-full border border-white/35 px-6 py-3.5 text-[13px] font-semibold tracking-[0.02em] text-foreground transition hover:border-white/55 hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+            >
+              {content.secondaryCta.label}
+            </a>
           </div>
         </div>
       </Container>
     </section>
   );
 }
-
-function Kpi({ title, value, body }) {
-  return (
-    <div className="rounded-2xl border border-card-border bg-black/10 p-4">
-      <div className="text-[11px] font-medium tracking-wide text-muted">{title}</div>
-      <div className="mt-1 text-lg font-semibold tracking-tight text-foreground">
-        {value}
-      </div>
-      <div className="mt-1 text-xs text-muted">{body}</div>
-    </div>
-  );
-}
-

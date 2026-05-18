@@ -107,6 +107,9 @@ export function PremiumBeforeAfter({
         </div>
       </div>
 
+      {/* Always show rotate hint when portrait mobile and NOT in fullscreen */}
+      <RotateHint visible={!open && portraitMobileHint} fixed />
+
       {open ? (
         <div
           className={cx(
@@ -177,10 +180,13 @@ function CloseIcon() {
   );
 }
 
-function RotateHint({ visible }) {
+function RotateHint({ visible, fixed = false }) {
   if (!visible) return null;
   return (
-    <div className="lux-rotate-hint pointer-events-none absolute bottom-24 left-1/2 z-30 flex -translate-x-1/2 items-center rounded-full border border-white/22 bg-black/65 px-5 py-2.5 text-[12px] font-semibold tracking-[0.12em] text-white shadow-[0_20px_50px_-28px_rgba(0,0,0,0.92),0_0_0_1px_rgba(255,255,255,0.1)_inset] backdrop-blur-sm sm:bottom-28 sm:px-6 sm:text-[13px] md:hidden">
+    <div className={cx(
+      "lux-rotate-hint pointer-events-none left-1/2 z-30 flex -translate-x-1/2 items-center rounded-full border border-white/22 bg-black/65 px-5 py-2.5 text-[12px] font-semibold tracking-[0.12em] text-white shadow-[0_20px_50px_-28px_rgba(0,0,0,0.92),0_0_0_1px_rgba(255,255,255,0.1)_inset] backdrop-blur-sm sm:px-6 sm:text-[13px] md:hidden",
+      fixed ? "fixed bottom-10" : "absolute bottom-24 sm:bottom-28",
+    )}>
       <span className="mr-2.5 inline-flex h-5 w-5 shrink-0 items-center justify-center sm:h-6 sm:w-6">
         <svg viewBox="0 0 24 24" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" aria-hidden="true">
           <path

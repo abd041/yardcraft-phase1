@@ -6,31 +6,59 @@ import { Logo } from "@/components/site/Logo";
 import { Button } from "@/components/ui/Button";
 import { BRAND } from "@/lib/brand";
 
+function PhoneIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 15 15"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <path
+        d="M3.65 1.5a.5.5 0 0 0-.36.15L2 2.94c-.74.74-.93 1.85-.52 2.85.82 1.98 2.35 4.08 4.28 6.01s4.03 3.46 6.01 4.28c1 .41 2.11.22 2.85-.52l1.29-1.29a.5.5 0 0 0 0-.7l-2.5-2.5a.5.5 0 0 0-.7 0l-1.5 1.5a.25.25 0 0 1-.33.02 16.9 16.9 0 0 1-3.54-3.54.25.25 0 0 1 .02-.33l1.5-1.5a.5.5 0 0 0 0-.7L4 1.65a.5.5 0 0 0-.35-.15z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-30 border-b border-card-border/70 bg-background/75 backdrop-blur">
-      <Container className="flex min-h-[3.5rem] items-center justify-between gap-3 py-2.5 sm:min-h-16 sm:py-3">
+    <header className="sticky top-0 z-30 border-b border-white/8 bg-background/80 backdrop-blur-md">
+      <Container className="flex min-h-15 items-center justify-between gap-4 py-3 sm:min-h-18 sm:py-3.5">
         <Logo />
-        <div className="flex items-center gap-3">
-          <nav className="hidden items-center gap-5 md:flex">
-            {landingContent.nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm text-muted hover:text-foreground transition"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+
+        <nav className="hidden items-center gap-6 lg:flex">
+          {landingContent.nav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-[13px] font-medium text-foreground/70 transition hover:text-foreground"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          <a
+            href={`tel:${BRAND.phoneTel}`}
+            className="hidden items-center gap-1.5 text-[13px] font-medium text-foreground/80 transition hover:text-foreground sm:flex"
+          >
+            <PhoneIcon />
+            {BRAND.phoneDisplay}
+          </a>
 
           <a
             href={`tel:${BRAND.phoneTel}`}
-            className="hidden text-sm font-medium tracking-tight text-foreground/90 hover:text-foreground transition sm:inline-flex"
+            className="hidden items-center justify-center rounded-full border border-white/30 px-4 py-2 text-[12px] font-semibold tracking-[0.02em] text-foreground transition hover:border-white/50 hover:bg-white/8 sm:inline-flex sm:px-5 sm:text-[13px]"
           >
-            {BRAND.phoneDisplay}
+            Contact Us
           </a>
-          <Button href="#quote" className="px-3 py-2 text-[12px] sm:px-4 sm:text-[13px]">
+
+          <Button href="#quote" className="px-3.5 py-2.5 text-[12px] sm:px-5 sm:text-[13px]">
             Request Your Custom Plan
           </Button>
         </div>
@@ -38,4 +66,3 @@ export function SiteHeader() {
     </header>
   );
 }
-

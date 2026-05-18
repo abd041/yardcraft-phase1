@@ -288,9 +288,10 @@ export function BeforeAfterSlider({
 
   const comparisonInner = (
     <>
+      {/* Base layer — full width, visible on the RIGHT = After */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={beforeUrl || afterUrl}
+        src={afterUrl || beforeUrl}
         alt=""
         draggable={false}
         decoding="async"
@@ -299,7 +300,8 @@ export function BeforeAfterSlider({
         className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center [transform:translateZ(0)]"
       />
 
-      {hasAfter ? (
+      {/* Clipped layer — revealed on the LEFT = Before */}
+      {hasBefore ? (
         <div
           className="pointer-events-none absolute inset-0 overflow-hidden"
           style={{
@@ -309,7 +311,7 @@ export function BeforeAfterSlider({
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={afterUrl}
+            src={beforeUrl}
             alt=""
             draggable={false}
             decoding="async"

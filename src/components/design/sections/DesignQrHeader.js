@@ -12,12 +12,9 @@ export function DesignQrHeader() {
           alt={BRAND.name}
           width={260}
           height={260}
-          className="mt-1 block h-[124px] w-[124px] object-contain drop-shadow-[0_12px_40px_rgba(0,0,0,0.35)] sm:mt-1.5 sm:h-[144px] sm:w-[144px] lg:mt-0 lg:h-[200px] lg:w-[200px]"
+          style={{ transform: "scale(2)" }}
           priority
         />
-        <div className="mt-3 max-w-[min(22rem,90vw)] text-pretty font-serif text-[0.9375rem] font-semibold leading-snug tracking-[-0.015em] text-foreground/95 sm:mt-4 sm:text-lg sm:leading-snug lg:text-xl">
-          {BRAND.tagline}
-        </div>
       </Container>
     </header>
   );
