@@ -23,6 +23,7 @@ export function LandingPage({ content }) {
       <div className="mx-auto h-px w-full max-w-6xl bg-card-border/70 opacity-70" />
       <ProcessSection
         id={content.sections.process.id}
+        label={content.sections.process.label}
         title={content.sections.process.title}
         items={content.sections.process.items}
       />
@@ -33,6 +34,7 @@ export function LandingPage({ content }) {
         label={content.sections.reviews.label}
         title={content.sections.reviews.title}
         items={content.sections.reviews.items}
+        googleMapsUrl={content.sections.reviews.googleMapsUrl}
       />
 
       <FinalCtaSection />

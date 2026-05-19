@@ -52,13 +52,13 @@ export function SiteHeader() {
           </a>
 
           <a
-            href={`tel:${BRAND.phoneTel}`}
+            href={`sms:${BRAND.phoneTel}?body=${encodeURIComponent("Hi YardCraft, I'd love to learn more about your outdoor services for my property.")}`}
             className="hidden items-center justify-center rounded-full border border-white/30 px-4 py-2 text-[12px] font-semibold tracking-[0.02em] text-foreground transition hover:border-white/50 hover:bg-white/8 sm:inline-flex sm:px-5 sm:text-[13px]"
           >
             Contact Us
           </a>
 
-          <Button href="#quote" className="px-3.5 py-2.5 text-[12px] sm:px-5 sm:text-[13px]">
+          <Button href="#quote" className="px-3.5 py-2 text-[11px] sm:px-4 sm:text-[12px]">
             Request Your Custom Plan
           </Button>
         </div>

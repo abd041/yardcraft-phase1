@@ -13,7 +13,7 @@ export function AdminShell({ title, children }) {
   const overlayRef = useRef(null);
   const drawerRef = useRef(null);
 
-  const shellLeftPadding = "lg:pl-[280px]";
+  const shellLeftPadding = "lg:pl-70";
 
   useEffect(() => {
     const prefersReduced =
@@ -38,8 +38,8 @@ export function AdminShell({ title, children }) {
   return (
     <div className="min-h-screen">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-44 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-gold/10 blur-3xl" />
-        <div className="absolute top-20 left-[-220px] h-[520px] w-[520px] rounded-full bg-green/10 blur-3xl" />
+        <div className="absolute -top-44 left-1/2 h-140 w-140 -translate-x-1/2 rounded-full bg-gold/10 blur-3xl" />
+        <div className="absolute top-20 -left-55 h-130 w-130 rounded-full bg-green/10 blur-3xl" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_50%_-160px,rgba(214,178,94,0.16),transparent_60%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.62),transparent_45%,rgba(0,0,0,0.7))]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.65)_100%)]" />
@@ -47,7 +47,7 @@ export function AdminShell({ title, children }) {
 
       {/* Fixed desktop sidebar */}
       <div className="hidden lg:block">
-        <div className="fixed inset-y-0 left-0 z-40 w-[280px]">
+        <div className="fixed inset-y-0 left-0 z-40 w-70">
           <AdminSidebar />
         </div>
       </div>
@@ -95,7 +95,7 @@ export function AdminShell({ title, children }) {
               <div className="text-sm font-semibold tracking-tight text-foreground">
                 {title}
               </div>
-              <div className="text-xs text-muted">Exclusive admin dashboard</div>
+              <div className="text-xs text-muted">YardCraft Admin</div>
             </div>
             <div className="lg:hidden flex items-center gap-2">
               <Logo variant="icon" className="h-9 w-9" />

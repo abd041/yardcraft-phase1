@@ -13,6 +13,31 @@ import { PremiumBeforeAfter } from "@/components/design/PremiumBeforeAfter";
 import { BRAND } from "@/lib/brand";
 import { QuoteIqEmbed } from "@/components/quoteiq/QuoteIqEmbed";
 
+function PhoneIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 15 15" fill="none" aria-hidden="true" className="shrink-0">
+      <path
+        d="M3.65 1.5a.5.5 0 0 0-.36.15L2 2.94c-.74.74-.93 1.85-.52 2.85.82 1.98 2.35 4.08 4.28 6.01s4.03 3.46 6.01 4.28c1 .41 2.11.22 2.85-.52l1.29-1.29a.5.5 0 0 0 0-.7l-2.5-2.5a.5.5 0 0 0-.7 0l-1.5 1.5a.25.25 0 0 1-.33.02 16.9 16.9 0 0 1-3.54-3.54.25.25 0 0 1 .02-.33l1.5-1.5a.5.5 0 0 0 0-.7L4 1.65a.5.5 0 0 0-.35-.15z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function MessageIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
+      <path
+        d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
@@ -72,17 +97,33 @@ export default async function Page({ params }) {
           className="relative z-20 h-[80dvh] min-h-[72dvh] w-full overflow-visible lg:h-[85vh] lg:min-h-[80vh]"
         />
 
-        <Container className="relative z-20 max-w-[560px] px-4 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-2xl border border-white/8 bg-black/35 px-6 py-6 text-center shadow-[0_20px_56px_-44px_rgba(0,0,0,0.78)] sm:rounded-[22px] sm:px-8 sm:py-7">
-            <div className="text-[10px] font-medium tracking-[0.2em] uppercase text-muted">
-              Tailored Property Preview
-            </div>
-            <div className="mt-5 flex justify-center sm:mt-6">
+        {/* Tailored Property Preview label — sits directly below the slider */}
+        <div className="relative z-20 py-6 text-center sm:py-8">
+          <h2 className="font-serif text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em] text-foreground sm:text-[2.5rem] lg:text-[3rem]">
+            Tailored Property Preview
+          </h2>
+        </div>
+
+        {/* CTA — What's your vision? */}
+        <Container className="relative z-20 max-w-[560px] px-4 pb-6 pt-1 sm:px-6 sm:pb-8 sm:pt-2 lg:px-8">
+          <div className="relative overflow-hidden rounded-2xl border border-white/8 bg-black/35 px-6 py-7 text-center shadow-[0_20px_56px_-44px_rgba(0,0,0,0.78)] sm:rounded-[22px] sm:px-8 sm:py-9">
+            <h2 className="font-serif text-[1.5rem] font-semibold leading-[1.15] tracking-[-0.025em] text-foreground sm:text-[1.75rem]">
+              What&apos;s your vision? Let&apos;s talk.
+            </h2>
+            <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row sm:justify-center sm:gap-4">
               <a
                 href={`tel:${BRAND.phoneTel}`}
-                className="inline-flex w-full max-w-[280px] items-center justify-center rounded-full border border-white/45 bg-white/14 px-6 py-3.5 text-[13px] font-semibold tracking-[0.04em] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_12px_40px_-24px_rgba(0,0,0,0.5)] transition duration-300 ease-out hover:border-white/58 hover:bg-white/20 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_16px_44px_-24px_rgba(0,0,0,0.48)] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/55 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto sm:min-w-[200px] sm:max-w-none sm:py-[1.05rem]"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/45 bg-white/14 px-7 py-3.5 text-[13px] font-semibold tracking-[0.04em] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_12px_40px_-24px_rgba(0,0,0,0.5)] transition duration-300 ease-out hover:border-white/58 hover:bg-white/20 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/55 sm:py-4"
               >
-                Call Now
+                <PhoneIcon />
+                Call Us
+              </a>
+              <a
+                href={`sms:${BRAND.phoneTel}?body=${encodeURIComponent("Hi YardCraft, I just viewed the before & after concept for my property and wanted to explore possibilities for my outdoor space.")}`}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-green/70 bg-green px-7 py-3.5 text-[13px] font-semibold tracking-[0.04em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_12px_40px_-24px_rgba(31,122,58,0.55)] transition duration-300 ease-out hover:bg-green/90 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/60 sm:py-4"
+              >
+                <MessageIcon />
+                Text Us
               </a>
             </div>
           </div>
@@ -97,12 +138,11 @@ export default async function Page({ params }) {
                 <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.1),transparent_55%)] sm:rounded-[28px]" />
               </div>
               <div className="relative px-4 pb-4 pt-10 text-center sm:px-10 sm:pb-6 sm:pt-12 lg:px-12 lg:pt-14">
-                <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-muted">Consultation</div>
-                <h2 className="mx-auto mt-3 max-w-[20ch] font-serif text-[1.625rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:mt-4 sm:max-w-none sm:text-3xl sm:leading-[1.08]">
-                  Tell us about your project.
+                <h2 className="mx-auto max-w-[26ch] font-serif text-[1.625rem] font-semibold leading-[1.18] tracking-[-0.03em] text-foreground sm:text-3xl sm:leading-[1.12]">
+                  Come home to that deep &ldquo;ahhh&rdquo; while your neighbors can&apos;t help but say &ldquo;wow.&rdquo;
                 </h2>
-                <p className="mx-auto mt-2.5 max-w-[34ch] text-[13px] font-medium leading-relaxed text-muted sm:mt-3 sm:text-sm">
-                  Submit your request and we’ll guide you to the right next step.
+                <p className="mx-auto mt-3 max-w-[34ch] text-[13px] font-medium leading-relaxed text-muted sm:mt-4 sm:text-sm">
+                  Tell us what you have in mind.
                 </p>
               </div>
               <div className="relative border-t border-white/[0.06] px-4 pb-6 pt-2 sm:px-8 sm:pb-8 sm:pt-4 lg:px-10 lg:pb-10">

@@ -31,7 +31,9 @@ function GoogleLogo() {
   );
 }
 
-export function ReviewsSection({ id, label, title, items }) {
+export function ReviewsSection({ id, label, title, items, googleMapsUrl }) {
+  const mapsUrl = googleMapsUrl || "https://maps.app.goo.gl/EqftrXDWDv6ejHjN8";
+
   return (
     <section id={id} className="relative scroll-mt-20 py-16 sm:py-24">
       <Container>
@@ -55,7 +57,7 @@ export function ReviewsSection({ id, label, title, items }) {
 
           <Reveal y={10} duration={0.8}>
             <a
-              href="https://www.google.com/maps"
+              href={mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="group flex shrink-0 items-center gap-1.5 text-sm text-muted transition hover:text-foreground"
@@ -78,30 +80,26 @@ export function ReviewsSection({ id, label, title, items }) {
             >
               <Stars count={review.stars} />
 
-              <p className="flex-1 text-[14px] leading-[1.75] text-foreground/70">
-                {review.body}
-              </p>
+              {review.body ? (
+                <p className="flex-1 text-[14px] leading-[1.75] text-foreground/70">
+                  {review.body}
+                </p>
+              ) : null}
 
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-foreground">{review.name}</p>
-                <GoogleLogo />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{review.name}</p>
+                  {review.location ? (
+                    <p className="text-[11px] text-muted">{review.location}</p>
+                  ) : null}
+                </div>
+                <a href={mapsUrl} target="_blank" rel="noopener noreferrer" aria-label="View on Google">
+                  <GoogleLogo />
+                </a>
               </div>
             </article>
           ))}
         </Stagger>
-
-        {/* Carousel dots */}
-        <div className="mt-8 flex justify-center gap-2" aria-hidden="true">
-          {[0, 1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className={[
-                "h-1.5 rounded-full transition-all",
-                i === 0 ? "w-5 bg-foreground/70" : "w-1.5 bg-foreground/20",
-              ].join(" ")}
-            />
-          ))}
-        </div>
       </Container>
     </section>
   );

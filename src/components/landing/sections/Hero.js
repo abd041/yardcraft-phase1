@@ -13,11 +13,13 @@ export function Hero({ content }) {
           src="/images/hero-bg.png"
           alt="Premium outdoor landscaping by YardCraft"
           fill
-          className="object-cover object-center"
+          className="object-cover object-[center_60%] sm:object-center"
           priority
         />
-        {/* Cinematic overlay: heavy on left for text legibility, reveals scene on right */}
-        <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(0,0,0,0.88)_0%,rgba(0,0,0,0.72)_38%,rgba(0,0,0,0.35)_65%,rgba(0,0,0,0.12)_100%)]" />
+        {/* Mobile overlay: light at top (reveals yard/home), dark at bottom (text legibility) */}
+        <div className="absolute inset-0 sm:hidden bg-[linear-gradient(to_bottom,rgba(5,5,6,0.18)_0%,rgba(5,5,6,0.48)_50%,rgba(5,5,6,0.88)_100%)]" />
+        {/* Desktop overlay: heavy on left for text legibility, reveals scene on right */}
+        <div className="absolute inset-0 hidden sm:block bg-[linear-gradient(100deg,rgba(0,0,0,0.88)_0%,rgba(0,0,0,0.72)_38%,rgba(0,0,0,0.35)_65%,rgba(0,0,0,0.12)_100%)]" />
         {/* Bottom vignette for depth */}
         <div className="absolute inset-x-0 bottom-0 h-48 bg-[linear-gradient(to_top,rgba(5,5,6,0.85),transparent)]" />
         {/* Top vignette */}
@@ -46,13 +48,13 @@ export function Hero({ content }) {
           </p>
 
           {/* CTAs */}
-          <div className="mt-8 flex flex-wrap gap-3 sm:gap-4">
-            <Button href={content.primaryCta.href} className="px-6 py-3.5 text-[13px]">
+          <div className="mt-8 flex flex-wrap items-center gap-3 sm:gap-4">
+            <Button href={content.primaryCta.href} className="px-5 py-2.5 text-[13px]">
               {content.primaryCta.label}
             </Button>
             <a
-              href={`tel:${BRAND.phoneTel}`}
-              className="inline-flex items-center justify-center rounded-full border border-white/35 px-6 py-3.5 text-[13px] font-semibold tracking-[0.02em] text-foreground transition hover:border-white/55 hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+              href={content.secondaryCta.href}
+              className="inline-flex items-center justify-center rounded-full border border-white/30 px-5 py-2.5 text-[13px] font-medium tracking-[0.02em] text-foreground/80 transition hover:border-white/50 hover:bg-white/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
             >
               {content.secondaryCta.label}
             </a>

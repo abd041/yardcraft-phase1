@@ -255,8 +255,8 @@ export function AdminDesignsClient({ initialDesigns }) {
     <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
       <ToastHost toasts={toasts} onRemove={removeToast} />
 
-      {/* LEFT: Property manager */}
-      <div className="rounded-3xl border border-card-border bg-black/10 p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.25),0_22px_60px_-52px_rgba(0,0,0,0.9)]">
+      {/* LEFT: Property manager — below asset manager on mobile, left on desktop */}
+      <div className="order-2 xl:order-1 rounded-3xl border border-card-border bg-black/10 p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.25),0_22px_60px_-52px_rgba(0,0,0,0.9)]">
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-xs font-semibold tracking-wide text-muted">Properties</div>
@@ -419,8 +419,8 @@ export function AdminDesignsClient({ initialDesigns }) {
         </div>
       </div>
 
-      {/* CENTER: Asset manager */}
-      <div className="rounded-3xl border border-card-border bg-black/10 p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.25),0_22px_60px_-52px_rgba(0,0,0,0.9)]">
+      {/* CENTER: Asset manager — first on mobile, right on desktop */}
+      <div className="order-1 xl:order-2 rounded-3xl border border-card-border bg-black/10 p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.25),0_22px_60px_-52px_rgba(0,0,0,0.9)]">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>

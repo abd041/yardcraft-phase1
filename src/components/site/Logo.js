@@ -71,7 +71,7 @@ export function Logo({ variant = "nav", className }) {
       )}
       aria-label={`${BRAND.name} home`}
     >
-      {mark("h-12 w-12 shrink-0 sm:h-14 sm:w-14 md:h-16 md:w-16")}
+      {mark("h-12 w-12 shrink-0 sm:h-14 sm:w-14 md:h-16 md:w-16 scale-[4.5]")}
       <span className="flex min-w-0 flex-col justify-center leading-[1.05]">
         <span className="font-serif text-[1.35rem] font-semibold tracking-[-0.03em] text-foreground sm:text-2xl md:text-[1.75rem]">
           {BRAND.name}

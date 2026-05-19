@@ -1,57 +1,114 @@
+"use client";
+
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
 
+const GOOGLE_MAPS_URL = "https://maps.app.goo.gl/EqftrXDWDv6ejHjN8";
+
+// Add real reviews here as they come in. text is optional — card renders
+// stars + author even if text is absent.
+const REVIEWS = [
+  {
+    text: "",
+    author: "Doris Benavides",
+    location: "Northern Virginia",
+    rating: 5,
+  },
+];
+
+// Manually curated project photos. Each entry shows as a card in the grid.
+// Replace these stock photos with real YardCraft project images when ready.
+// src can be a Supabase URL, /images/... path, or any absolute URL.
+// Leave src as "" to keep that slot as an empty placeholder.
+// Add or remove entries to control exactly how many cards appear.
+const PHOTOS = [
+  {
+    src: "https://images.pexels.com/photos/4135714/pexels-photo-4135714.jpeg?auto=compress&cs=tinysrgb&w=900&h=675&dpr=1",
+    label: "Outdoor patio & fireplace",
+  },
+  {
+    src: "https://images.pexels.com/photos/30725657/pexels-photo-30725657.jpeg?auto=compress&cs=tinysrgb&w=900&h=675&dpr=1",
+    label: "Custom outdoor kitchen",
+  },
+  {
+    src: "https://images.pexels.com/photos/25972319/pexels-photo-25972319.jpeg?auto=compress&cs=tinysrgb&w=900&h=675&dpr=1",
+    label: "Backyard garden retreat",
+  },
+];
+
 export function TrustSection() {
+  const hasReviews = REVIEWS.length > 0;
+
   return (
     <section id="trust" className="scroll-mt-24 py-28 sm:py-36">
       <Container>
         <div className="relative overflow-hidden rounded-2xl border border-white/6 bg-black/40 p-6 sm:rounded-[22px] sm:p-8 lg:p-10">
+
+          {/* Header */}
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between lg:gap-8">
             <div className="relative">
-              <div className="text-xs font-medium tracking-[0.14em] uppercase text-muted">Trust</div>
               <Reveal
                 as="h2"
-                className="mt-1 font-serif text-pretty text-4xl font-semibold leading-[1.06] tracking-[-0.012em] text-foreground sm:text-5xl"
+                className="font-serif text-4xl font-semibold leading-[1.06] tracking-[-0.012em] text-foreground sm:text-5xl"
               >
-                Trusted by homeowners across Northern Virginia
-              </Reveal>
-              <Reveal as="p" className="mt-4 max-w-[52ch] text-base font-medium leading-[1.75] text-muted lg:text-[1.125rem] lg:leading-[1.72]" y={12} duration={0.85}>
-                Clean reputation, local proof, and real install results.
+                Trusted by Homeowners
+                <br className="sm:hidden" />
+                {" "}Across Northern Virginia
               </Reveal>
             </div>
-            <Reveal className="relative flex items-center gap-3 text-sm font-medium leading-relaxed text-muted lg:text-base" y={10} duration={0.8}>
-              <Stars />
-              <span className="text-foreground">4.9 average rating</span>
+
+            <Reveal className="flex shrink-0 flex-col items-start gap-2 sm:items-end" y={10} duration={0.8}>
+              <div className="flex items-center gap-2.5">
+                <Stars />
+                <span className="text-sm font-semibold text-foreground">5.0</span>
+              </div>
+              <a
+                href={GOOGLE_MAPS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs font-medium text-muted underline-offset-4 transition hover:text-foreground hover:underline"
+              >
+                <GoogleIcon size={12} />
+                Verify on Google Maps →
+              </a>
             </Reveal>
           </div>
 
-          <Stagger className="relative mt-24 space-y-20" stagger={0.07}>
-            <div data-stagger className="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-x-16 lg:gap-y-6">
-              <TrustShell title="Google Reviews" kicker="Social proof">
-                <div className="flex items-center gap-3">
-                  <Stars />
-                  <span className="text-sm font-medium text-muted lg:text-[0.9375rem]">Live rating and verified review count</span>
-                </div>
-              </TrustShell>
-              <TrustShell title="Client identity" kicker="Name + area">
-                <p className="text-sm font-medium leading-7 text-muted lg:text-[0.9375rem] lg:leading-[1.65]">
-                  Homeowner name, neighborhood/city, and project type displayed with each review.
-                </p>
-              </TrustShell>
+          <Stagger className="relative mt-14 sm:mt-16" stagger={0.07}>
+
+            {/* Review cards */}
+            {hasReviews && (
+              <div data-stagger className="grid gap-8 md:grid-cols-2 md:gap-10 lg:grid-cols-3 lg:gap-x-12">
+                {REVIEWS.map((review, i) => (
+                  <ReviewCard key={i} {...review} />
+                ))}
+              </div>
+            )}
+
+            {/* Project photo slots — replace src with real project photos */}
+            <div
+              data-stagger
+              className={hasReviews ? "mt-14 grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-x-12" : "grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-x-12"}
+            >
+              {PHOTOS.map((photo, i) => (
+                <PhotoSlot key={i} src={photo.src} label={photo.label} />
+              ))}
             </div>
 
-            <div data-stagger className="grid gap-8 md:grid-cols-2 md:gap-10 lg:grid-cols-3 lg:gap-x-12">
-              <ReviewCardPlaceholder />
-              <ReviewCardPlaceholder />
-              <ReviewCardPlaceholder />
+            {/* Google Maps CTA */}
+            <div data-stagger className="mt-12 flex justify-center">
+              <a
+                href={GOOGLE_MAPS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/6 px-7 py-3.5 text-[13px] font-semibold tracking-[0.03em] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] transition hover:border-white/24 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/55"
+              >
+                <GoogleIcon size={16} />
+                See all reviews on Google
+              </a>
             </div>
 
-            <div data-stagger className="grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-x-12">
-              <PhotoPlaceholder label="Project highlight" />
-              <PhotoPlaceholder label="Project highlight" />
-              <PhotoPlaceholder label="Project highlight" />
-            </div>
           </Stagger>
         </div>
       </Container>
@@ -59,52 +116,87 @@ export function TrustSection() {
   );
 }
 
-function TrustShell({ title, kicker, children }) {
+function ReviewCard({ text, author, location, rating }) {
   return (
-    <div className="space-y-5 border-t border-white/[0.09] pt-7">
-      <div className="flex items-start justify-between gap-3">
-        <div className="text-sm font-semibold tracking-tight text-foreground/95">{title}</div>
-        <span className="rounded-full bg-black/20 px-3 py-1 text-[10px] tracking-[0.08em] uppercase text-muted/90">
-          {kicker}
-        </span>
+    <div className="space-y-4 border-t border-white/9 pt-7">
+      <Stars count={rating} />
+      {text ? (
+        <p className="text-sm font-medium leading-[1.72] text-muted lg:text-[1.0625rem] lg:leading-[1.72]">
+          &ldquo;{text}&rdquo;
+        </p>
+      ) : null}
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-xs font-medium tracking-[0.08em] uppercase text-muted/90 lg:text-[13px]">
+          {author}{location ? ` • ${location}` : ""}
+        </div>
+        <a
+          href={GOOGLE_MAPS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 opacity-60 transition hover:opacity-100"
+          aria-label="View on Google"
+        >
+          <GoogleIcon size={14} />
+        </a>
       </div>
-      {children}
     </div>
   );
 }
 
-function ReviewCardPlaceholder() {
-  return (
-    <div className="space-y-4 border-t border-white/[0.09] pt-7">
-      <p className="text-sm font-medium leading-[1.72] text-muted lg:text-[1.0625rem] lg:leading-[1.72]">
-        “Beautiful execution, professional communication, and a result that elevated our entire home.”
-      </p>
-      <div className="text-xs font-medium tracking-[0.08em] uppercase text-muted/90 lg:text-[13px]">
-        Homeowner Name • Northern Virginia
-      </div>
-    </div>
-  );
-}
-
-function PhotoPlaceholder({ label }) {
+function PhotoSlot({ label, src }) {
   return (
     <div className="space-y-3.5">
-      <div className="aspect-4/3 w-full rounded-2xl border border-white/[0.11] bg-white/[0.035]" />
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={label}
+          loading="lazy"
+          className="aspect-4/3 w-full rounded-2xl object-cover object-center"
+        />
+      ) : (
+        <div className="aspect-4/3 w-full rounded-2xl border border-white/11 bg-white/[0.035]" />
+      )}
       <div className="text-[11px] tracking-[0.14em] uppercase text-muted/85">{label}</div>
     </div>
   );
 }
 
-function Stars() {
+function Stars({ count = 5 }) {
   return (
-    <span className="inline-flex items-center gap-1 text-[color-mix(in_oklab,var(--gold)_75%,white)]">
-      <span aria-hidden="true">★</span>
-      <span aria-hidden="true">★</span>
-      <span aria-hidden="true">★</span>
-      <span aria-hidden="true">★</span>
-      <span aria-hidden="true">★</span>
-      <span className="sr-only">5 star rating</span>
+    <span className="inline-flex items-center gap-1 text-[color-mix(in_oklab,var(--gold)_75%,white)]" aria-label={`${count} star rating`}>
+      {Array.from({ length: count }).map((_, i) => (
+        <span key={i} aria-hidden="true">★</span>
+      ))}
     </span>
   );
 }
 
+function GoogleIcon({ size = 16 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+        fill="#34A853"
+      />
+      <path
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+        fill="#EA4335"
+      />
+    </svg>
+  );
+}
