@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 
 import { requireAdminApi } from "@/lib/authApi";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabaseAdmin";
-import { getSiteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -53,9 +52,10 @@ export async function GET() {
 }
 
 /* ── POST /api/admin/users ───────────────────────────────────────
-   Invites a new admin by email:
-   1. Supabase sends them a magic-link email
-   2. We pre-set profiles.role = "admin" using their new user id
+   Creates a new admin with a password set by the super admin:
+   1. Creates the auth user with email_confirm: true (no email sent)
+   2. Sets profiles.role = "admin" immediately
+   The new user can log in right away with the provided credentials.
 ──────────────────────────────────────────────────────────────── */
 export async function POST(req) {
   const auth = await requireAdminApi();
@@ -65,9 +65,9 @@ export async function POST(req) {
     return NextResponse.json({ ok: false, error: "Supabase not configured." }, { status: 503 });
   }
 
-  let email;
+  let email, password;
   try {
-    ({ email } = await req.json());
+    ({ email, password } = await req.json());
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
   }
@@ -76,38 +76,42 @@ export async function POST(req) {
     return NextResponse.json({ ok: false, error: "A valid email address is required." }, { status: 400 });
   }
 
+  if (!password || typeof password !== "string" || password.length < 8) {
+    return NextResponse.json({ ok: false, error: "Password must be at least 8 characters." }, { status: 400 });
+  }
+
   const admin = getSupabaseAdmin();
 
-  const { data, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email.trim().toLowerCase(), {
-    redirectTo: `${getSiteUrl()}/admin/login`,
+  const { data, error: createError } = await admin.auth.admin.createUser({
+    email: email.trim().toLowerCase(),
+    password,
+    email_confirm: true,
   });
 
-  if (inviteError) {
-    return NextResponse.json({ ok: false, error: inviteError.message }, { status: 400 });
+  if (createError) {
+    return NextResponse.json({ ok: false, error: createError.message }, { status: 400 });
   }
 
   const userId = data?.user?.id;
   if (!userId) {
-    return NextResponse.json({ ok: false, error: "Invite succeeded but user ID was not returned." }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "User created but ID was not returned." }, { status: 500 });
   }
 
-  // Pre-set admin role so the invited user has access the moment they confirm.
   const { error: profileError } = await admin
     .from("profiles")
     .upsert({ id: userId, role: "admin" }, { onConflict: "id" });
 
   if (profileError) {
-    // Non-fatal — invite was sent. Log and surface as a warning.
     console.error("[admin/users] profile upsert failed:", profileError.message);
     return NextResponse.json({
       ok: true,
-      warning: "Invite sent but role assignment failed — set profiles.role manually.",
+      warning: "User created but role assignment failed — set profiles.role manually.",
       user: { id: userId, email: data.user.email },
     });
   }
 
   return NextResponse.json({
     ok: true,
-    user: { id: userId, email: data.user.email, confirmed: false },
+    user: { id: userId, email: data.user.email, confirmed: true },
   });
 }

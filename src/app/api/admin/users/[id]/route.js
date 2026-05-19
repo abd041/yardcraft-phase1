@@ -6,8 +6,8 @@ import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabaseAdmin";
 export const dynamic = "force-dynamic";
 
 /* ── DELETE /api/admin/users/[id] ───────────────────────────────
-   Revokes admin access by setting profiles.role = null.
-   Does NOT delete the Supabase Auth user — they can be re-invited.
+   Permanently deletes a user from both the profiles table and
+   Supabase Auth. Cannot be used on yourself.
 ──────────────────────────────────────────────────────────────── */
 export async function DELETE(_req, { params }) {
   const auth = await requireAdminApi();
@@ -20,7 +20,7 @@ export async function DELETE(_req, { params }) {
   }
 
   if (id === auth.user.id) {
-    return NextResponse.json({ ok: false, error: "You cannot revoke your own admin access." }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "You cannot delete your own account." }, { status: 400 });
   }
 
   if (!isSupabaseConfigured()) {
@@ -29,10 +29,11 @@ export async function DELETE(_req, { params }) {
 
   const admin = getSupabaseAdmin();
 
-  const { error } = await admin
-    .from("profiles")
-    .update({ role: null })
-    .eq("id", id);
+  // Delete profile first in case there is no cascade on the foreign key.
+  await admin.from("profiles").delete().eq("id", id);
+
+  // Delete the auth user — this is the permanent removal.
+  const { error } = await admin.auth.admin.deleteUser(id);
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
