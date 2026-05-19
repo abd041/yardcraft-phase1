@@ -13,7 +13,7 @@ export function Hero({ content }) {
           src="/images/hero-bg.png"
           alt="Premium outdoor landscaping by YardCraft"
           fill
-          className="object-cover object-[center_60%] sm:object-center"
+          className="object-cover object-[center_35%] sm:object-center"
           priority
         />
         {/* Mobile overlay: light at top (reveals yard/home), dark at bottom (text legibility) */}

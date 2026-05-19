@@ -19,9 +19,9 @@ export function SiteFooter() {
       <Container className="py-9 sm:py-10">
         {/* Three-column layout */}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:items-center sm:gap-4">
-          {/* Logo */}
+          {/* Logo mark */}
           <div>
-            <Logo />
+            <Logo variant="mark" />
           </div>
 
           {/* Phone + location — centered */}
@@ -38,7 +38,7 @@ export function SiteFooter() {
 
           {/* Copyright — right aligned */}
           <p className="text-xs text-muted sm:text-right">
-            © {new Date().getFullYear()} YardCraft. All rights reserved.
+            © {new Date().getFullYear()} {BRAND.legalEntity}. All rights reserved.
           </p>
         </div>
       </Container>
