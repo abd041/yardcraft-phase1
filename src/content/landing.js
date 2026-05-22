@@ -16,9 +16,9 @@ export const landingContent = {
     eyebrow: "Elevated Outdoor Living",
     title: "Premium Outdoor\nTransformations",
     subtitle:
-      "Landscaping, pavers, planting, lighting, outdoor living, and property upgrades designed to elevate premium homes across Northern Virginia.",
+      "Landscaping, pavers, lighting, and outdoor living designed to make coming home feel exceptional.",
     primaryCta: { href: "#quote", label: "Request Your Custom Plan" },
-    secondaryCta: { href: SMS_GENERAL, label: "Contact Us" },
+    secondaryCta: { href: SMS_GENERAL, label: "Text Us" },
   },
   sections: {
     services: {

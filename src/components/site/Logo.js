@@ -8,19 +8,59 @@ function cx(...parts) {
 }
 
 /**
- * @param {"nav" | "icon" | "mark" | "auth"} [variant="nav"] — nav: mark + wordmark; icon: mark only (compact); mark: larger mark; auth: stacked for sign-in.
+ * @param {"nav" | "header" | "footer" | "icon" | "mark" | "auth"} [variant="nav"]
+ * — header/footer: logomark + green/gold wordmark & tagline (footer shows wordmark at all widths);
+ *   nav: mark + wordmark; icon: mark only; mark: larger mark; auth: stacked sign-in.
  */
 export function Logo({ variant = "nav", className }) {
-  const mark = (imgClass) => (
+  const mark = (imgClass, src = "/images/YardCraftLogo.png") => (
     <Image
-      src="/images/YardCraftLogo.png"
-      alt={BRAND.name}
+      src={src}
+      alt=""
       width={160}
       height={160}
       className={cx("object-contain", imgClass)}
       priority
     />
   );
+
+  if (variant === "header" || variant === "footer") {
+    const isHeader = variant === "header";
+    return (
+      <Link
+        href="/"
+        className={cx(
+          "inline-flex min-w-0 items-center",
+          isHeader && "ml-3 md:ml-0",
+          className,
+        )}
+        aria-label={`${BRAND.name} home`}
+      >
+        <span className="relative shrink-0">
+          {mark(
+            "h-11 w-11 scale-150 sm:h-12 sm:w-12 md:h-[3.25rem] md:w-[3.25rem] md:scale-[1.3]",
+            "/images/YardCraftLogo-main.png",
+          )}
+        </span>
+        <span
+          className={cx(
+            "min-w-0 flex-col items-start justify-center border-l border-white/10 pl-3 sm:pl-4",
+            isHeader ? "hidden md:flex" : "flex",
+          )}
+        >
+          <span
+            className="yc-header-wordmark font-serif text-[40px] font-semibold leading-none tracking-[-0.02em]"
+            aria-hidden="true"
+          >
+            {BRAND.name}
+          </span>
+          <span className="yc-header-tagline mt-0 font-serif text-[10px] font-normal leading-tight sm:text-[11px] md:ml-[6px] md:text-xs">
+            {BRAND.tagline}
+          </span>
+        </span>
+      </Link>
+    );
+  }
 
   if (variant === "icon") {
     return (
@@ -71,7 +111,7 @@ export function Logo({ variant = "nav", className }) {
       )}
       aria-label={`${BRAND.name} home`}
     >
-      {mark("h-12 w-12 shrink-0 sm:h-14 sm:w-14 md:h-16 md:w-16 scale-[4.5]")}
+      {mark("h-12 w-12 shrink-0 sm:h-14 sm:w-14 md:h-16 md:w-16")}
       <span className="flex min-w-0 flex-col justify-center leading-[1.05]">
         <span className="font-serif text-[1.35rem] font-semibold tracking-[-0.03em] text-foreground sm:text-2xl md:text-[1.75rem]">
           {BRAND.name}

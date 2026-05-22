@@ -13,10 +13,11 @@ export function FinalCtaSection() {
           src="/images/final-cta.png"
           alt="Transform your outdoor space"
           fill
-          className="object-cover object-center"
+          className="yc-lux-photo object-cover object-center"
         />
-        {/* Deep cinematic overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,5,6,0.55)_0%,rgba(5,5,6,0.5)_50%,rgba(5,5,6,0.72)_100%)]" />
+        <div className="yc-lux-photo-warmth" aria-hidden="true" />
+        {/* Deep cinematic overlay — slightly lighter so photo color reads through */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,5,6,0.48)_0%,rgba(5,5,6,0.44)_50%,rgba(5,5,6,0.68)_100%)]" />
         {/* Warm amber glow from center */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_55%,rgba(180,130,40,0.12),transparent_70%)]" />
       </div>
@@ -37,7 +38,7 @@ export function FinalCtaSection() {
             href={`sms:${BRAND.phoneTel}?body=${encodeURIComponent("Hi YardCraft, I'd love to learn more about your outdoor services for my property.")}`}
             className="inline-flex items-center justify-center rounded-full border border-white/35 px-7 py-4 text-[13px] font-semibold tracking-[0.02em] text-foreground transition hover:border-white/55 hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
           >
-            Contact Us
+            Text Us
           </a>
         </div>
       </Container>

@@ -77,6 +77,45 @@ body {
   touch-action: pan-y;
 }
 
+/* Header wordmark — matches brand lockup: green top / gold bottom split, white slogan */
+.yc-header-wordmark {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--green-bright) 28%, var(--green)) 0%,
+    color-mix(in oklab, var(--green-bright) 28%, var(--green)) 48%,
+    var(--gold) 52%,
+    color-mix(in oklab, var(--gold) 72%, #e09a3a) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.yc-header-tagline {
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+
+/* Homepage hero & bottom CTA — warmer, richer photography (CSS only) */
+.yc-lux-photo {
+  filter: brightness(1.08) contrast(1.12) saturate(1.22) hue-rotate(-5deg);
+}
+
+.yc-lux-photo-warmth {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklab, var(--gold) 30%, transparent) 0%,
+    transparent 34%,
+    color-mix(in oklab, var(--green) 14%, transparent) 100%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0.62;
+}
+
 ::selection {
   background: color-mix(in oklab, var(--gold) 35%, transparent);
 }

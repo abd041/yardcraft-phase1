@@ -13,9 +13,10 @@ export function Hero({ content }) {
           src="/images/hero-bg.png"
           alt="Premium outdoor landscaping by YardCraft"
           fill
-          className="object-cover object-[center_35%] sm:object-center"
+          className="yc-lux-photo object-cover object-[78%_40%] sm:object-center"
           priority
         />
+        <div className="yc-lux-photo-warmth" aria-hidden="true" />
         {/* Mobile overlay: light at top (reveals yard/home), dark at bottom (text legibility) */}
         <div className="absolute inset-0 sm:hidden bg-[linear-gradient(to_bottom,rgba(5,5,6,0.18)_0%,rgba(5,5,6,0.48)_50%,rgba(5,5,6,0.88)_100%)]" />
         {/* Desktop overlay: heavy on left for text legibility, reveals scene on right */}
@@ -29,7 +30,7 @@ export function Hero({ content }) {
       </div>
 
       <Container className="relative z-10 py-24 sm:py-28 lg:py-36">
-        <div className="max-w-[560px]">
+        <div className="max-w-[560px] sm:max-w-[44rem]">
           {/* Eyebrow */}
           <p className="mb-5 text-[11px] font-semibold tracking-[0.2em] uppercase text-foreground/60 sm:text-xs">
             {content.eyebrow}
@@ -37,9 +38,8 @@ export function Hero({ content }) {
 
           {/* Headline */}
           <h1 className="font-serif text-[3.25rem] font-semibold leading-[0.94] tracking-[-0.025em] text-foreground sm:text-[4.5rem] lg:text-[5.25rem]">
-            Premium Outdoor
-            <br />
-            Transformations
+            <span className="block sm:whitespace-nowrap">Premium Outdoor</span>
+            <span className="block sm:whitespace-nowrap">Transformations</span>
           </h1>
 
           {/* Subtitle */}

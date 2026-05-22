@@ -28,7 +28,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-white/8 bg-background/80 backdrop-blur-md">
       <Container className="flex min-h-15 items-center justify-between gap-4 py-3 sm:min-h-18 sm:py-3.5">
-        <Logo />
+        <Logo variant="header" />
 
         <nav className="hidden items-center gap-6 lg:flex">
           {landingContent.nav.map((item) => (
@@ -43,6 +43,15 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Phone in nav — mobile landscape only; portrait uses quote button only */}
+          <a
+            href={`tel:${BRAND.phoneTel}`}
+            className="hidden max-w-[calc(100vw-8rem)] items-center gap-1.5 whitespace-nowrap rounded-full border border-white/30 px-3 py-2 text-[11px] font-semibold tracking-[0.03em] text-foreground transition hover:border-white/50 hover:bg-white/8 max-sm:landscape:inline-flex sm:hidden"
+          >
+            <PhoneIcon />
+            {BRAND.phoneDisplay}
+          </a>
+
           <a
             href={`tel:${BRAND.phoneTel}`}
             className="hidden items-center gap-1.5 text-[13px] font-medium text-foreground/80 transition hover:text-foreground sm:flex"
@@ -55,10 +64,13 @@ export function SiteHeader() {
             href={`sms:${BRAND.phoneTel}?body=${encodeURIComponent("Hi YardCraft, I'd love to learn more about your outdoor services for my property.")}`}
             className="hidden items-center justify-center rounded-full border border-white/30 px-4 py-2 text-[12px] font-semibold tracking-[0.02em] text-foreground transition hover:border-white/50 hover:bg-white/8 sm:inline-flex sm:px-5 sm:text-[13px]"
           >
-            Contact Us
+            Text Us
           </a>
 
-          <Button href="#quote" className="px-3.5 py-2 text-[11px] sm:px-4 sm:text-[12px]">
+          <Button
+            href="#quote"
+            className="inline-flex shrink-0 px-3.5 py-2 text-[11px] sm:px-4 sm:text-[12px]"
+          >
             Request Your Custom Plan
           </Button>
         </div>

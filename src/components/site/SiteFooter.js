@@ -17,12 +17,8 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-card-border/50 bg-black/25">
       <Container className="py-9 sm:py-10">
-        {/* Three-column layout */}
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:items-center sm:gap-4">
-          {/* Logo mark */}
-          <div>
-            <Logo variant="mark" />
-          </div>
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-6 lg:gap-10">
+          <Logo variant="footer" />
 
           {/* Phone + location — centered */}
           <div className="flex flex-col items-start gap-1.5 sm:items-center">
