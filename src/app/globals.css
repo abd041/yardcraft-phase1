@@ -77,7 +77,11 @@ body {
   touch-action: pan-y;
 }
 
-/* Header wordmark — matches brand lockup: green top / gold bottom split, white slogan */
+/* Header wordmark — Yard: solid green; Craft: green top / gold bottom split */
+.yc-header-wordmark-yard {
+  color: color-mix(in oklab, var(--green-bright) 24%, var(--green));
+}
+
 .yc-header-wordmark {
   background-image: linear-gradient(
     180deg,

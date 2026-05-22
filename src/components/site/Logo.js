@@ -49,10 +49,11 @@ export function Logo({ variant = "nav", className }) {
           )}
         >
           <span
-            className="yc-header-wordmark font-serif text-[40px] font-semibold leading-none tracking-[-0.02em]"
+            className="font-serif text-[40px] font-semibold leading-none tracking-[-0.02em]"
             aria-hidden="true"
           >
-            {BRAND.name}
+            <span className="yc-header-wordmark-yard">Yard</span>
+            <span className="yc-header-wordmark">Craft</span>
           </span>
           <span className="yc-header-tagline mt-0 font-serif text-[10px] font-normal leading-tight sm:text-[11px] md:ml-[6px] md:text-xs">
             {BRAND.tagline}
