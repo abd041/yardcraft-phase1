@@ -36,6 +36,8 @@ body {
   --muted: #d8d1c4;
   --color-muted: var(--muted);
   font-feature-settings: "kern" 1, "liga" 1;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 @media (min-width: 1024px) {
@@ -100,9 +102,11 @@ body {
   letter-spacing: 0.01em;
 }
 
-/* Homepage hero & bottom CTA — warmer, richer photography (CSS only) */
+/* Site-wide luxury photo treatment — richer color, warm tone, sharper presence */
 .yc-lux-photo {
-  filter: brightness(1.08) contrast(1.12) saturate(1.22) hue-rotate(-5deg);
+  filter: brightness(1.04) contrast(1.16) saturate(1.34) hue-rotate(-3deg);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .yc-lux-photo-warmth {
@@ -112,12 +116,12 @@ body {
   z-index: 1;
   background: linear-gradient(
     145deg,
-    color-mix(in oklab, var(--gold) 30%, transparent) 0%,
-    transparent 34%,
-    color-mix(in oklab, var(--green) 14%, transparent) 100%
+    color-mix(in oklab, var(--gold) 38%, transparent) 0%,
+    transparent 38%,
+    color-mix(in oklab, #c4893a 12%, transparent) 100%
   );
-  mix-blend-mode: soft-light;
-  opacity: 0.62;
+  mix-blend-mode: overlay;
+  opacity: 0.42;
 }
 
 ::selection {

@@ -14,6 +14,21 @@ function dist2(a, b) {
 const INSPECT_SCALE_MIN = 0.65;
 const INSPECT_SCALE_MAX = 4;
 
+/** Keep transform pan inside the clip box so pinch/pan never widens the page. */
+function normalizeInspect(state, width, height) {
+  const s = clamp(state.s, INSPECT_SCALE_MIN, INSPECT_SCALE_MAX);
+  if (s <= 1.02) {
+    return { s, x: 0, y: 0 };
+  }
+  const maxX = width ? (width * (s - 1)) / 2 : 0;
+  const maxY = height ? (height * (s - 1)) / 2 : 0;
+  return {
+    s,
+    x: maxX ? clamp(state.x, -maxX, maxX) : 0,
+    y: maxY ? clamp(state.y, -maxY, maxY) : 0,
+  };
+}
+
 export function BeforeAfterSlider({
   beforeUrl,
   afterUrl,
@@ -40,6 +55,11 @@ export function BeforeAfterSlider({
   const draggingRef = useRef(false);
   const windowDragCleanupRef = useRef(null);
   const pct = useMemo(() => clamp(value, 0, 100), [value]);
+  const valueRef = useRef(pct);
+
+  useLayoutEffect(() => {
+    valueRef.current = pct;
+  }, [pct]);
 
   function cleanupWindowDragListeners() {
     windowDragCleanupRef.current?.();
@@ -79,10 +99,18 @@ export function BeforeAfterSlider({
   const pointersRef = useRef(new Map());
   const pinchRef = useRef(null);
   const panRef = useRef(null);
+  const inspectActiveRef = useRef(false);
+  const [rootBox, setRootBox] = useState({ w: 0, h: 0 });
 
   function setInspectBoth(next) {
-    setInspect(next);
-    inspectRef.current = next;
+    const root = rootRef.current;
+    const normalized = normalizeInspect(
+      next,
+      root?.clientWidth ?? 0,
+      root?.clientHeight ?? 0,
+    );
+    setInspect(normalized);
+    inspectRef.current = normalized;
   }
 
   const hasBefore = Boolean(beforeUrl);
@@ -90,6 +118,7 @@ export function BeforeAfterSlider({
   const hasAny = hasBefore || hasAfter;
 
   useEffect(() => {
+    if (inspectActiveRef.current) return;
     onChange?.(pct);
   }, [pct, onChange]);
 
@@ -100,13 +129,15 @@ export function BeforeAfterSlider({
     };
   }, []);
 
-  /** Sync external `initial` without fighting an active drag (avoids parent echo loops, e.g. PremiumBeforeAfter). */
+  /** Sync external `initial` without fighting drag or pinch/pan (avoids parent echo loops). */
   useEffect(() => {
-    if (draggingRef.current) return;
+    if (initial === undefined || initial === null) return;
+    if (draggingRef.current || inspectActiveRef.current) return;
     const n = Number(initial);
-    const next = Number.isFinite(n) ? clamp(n, 0, 100) : 50;
+    if (!Number.isFinite(n)) return;
+    const next = clamp(n, 0, 100);
     queueMicrotask(() => {
-      if (draggingRef.current) return;
+      if (draggingRef.current || inspectActiveRef.current) return;
       setValue((prev) => (Math.abs(prev - next) < 0.05 ? prev : next));
     });
   }, [initial]);
@@ -114,13 +145,19 @@ export function BeforeAfterSlider({
   function setFromClientX(clientX) {
     const root = rootRef.current;
     if (!root) return;
-    const surface =
-      isInspectMode ? root.querySelector("[data-ba-compare-surface]") : null;
-    const el = surface instanceof HTMLElement ? surface : root;
-    const rect = el.getBoundingClientRect();
+    const rect = root.getBoundingClientRect();
     if (!rect.width) return;
     const next = ((clientX - rect.left) / rect.width) * 100;
     setValue(clamp(next, 0, 100));
+  }
+
+  function setInspectActive(active) {
+    inspectActiveRef.current = active;
+  }
+
+  function syncInspectPointers() {
+    const active = pointersRef.current.size > 0;
+    setInspectActive(active);
   }
 
   function onTrackPointerDown(e) {
@@ -150,15 +187,14 @@ export function BeforeAfterSlider({
     }
   }
 
-  function clearInspectPointers() {
-    pointersRef.current.clear();
-    pinchRef.current = null;
-    panRef.current = null;
-  }
-
   function onInspectPointerDown(e) {
     if (!isInspectMode) return;
+    if (e.target.closest("[data-ba-handle]")) return;
     e.stopPropagation();
+    if (draggingRef.current) {
+      draggingRef.current = false;
+      cleanupWindowDragListeners();
+    }
     const el = zoomLayerRef.current;
     if (el?.setPointerCapture) {
       try {
@@ -177,16 +213,24 @@ export function BeforeAfterSlider({
       };
       panRef.current = null;
     } else if (pointersRef.current.size === 1) {
-      // One-finger pan at any zoom (including 1×) — divider never moves from image touches.
-      panRef.current = {
-        cx: e.clientX,
-        cy: e.clientY,
-        ox: inspectRef.current.x,
-        oy: inspectRef.current.y,
-      };
-      pinchRef.current = null;
+      startInspectPan(e.clientX, e.clientY);
     }
-    if (pointersRef.current.size >= 2) e.preventDefault();
+    syncInspectPointers();
+    if (pointersRef.current.size >= 1) e.preventDefault();
+  }
+
+  function startInspectPan(clientX, clientY) {
+    if (inspectRef.current.s <= 1.02) {
+      panRef.current = null;
+      return;
+    }
+    panRef.current = {
+      cx: clientX,
+      cy: clientY,
+      ox: inspectRef.current.x,
+      oy: inspectRef.current.y,
+    };
+    pinchRef.current = null;
   }
 
   function onInspectPointerMove(e) {
@@ -211,14 +255,24 @@ export function BeforeAfterSlider({
         y: p.oy + (e.clientY - p.cy),
       });
     }
-    if (pointersRef.current.size >= 2) e.preventDefault();
+    if (pointersRef.current.size >= 1) e.preventDefault();
   }
 
   function onInspectPointerUp(e) {
     if (!isInspectMode) return;
     pointersRef.current.delete(e.pointerId);
-    if (pointersRef.current.size < 2) pinchRef.current = null;
-    if (pointersRef.current.size === 0) panRef.current = null;
+    if (pointersRef.current.size < 2) {
+      pinchRef.current = null;
+      if (pointersRef.current.size === 1) {
+        const remaining = Array.from(pointersRef.current.values())[0];
+        startInspectPan(remaining.x, remaining.y);
+      }
+    }
+    if (pointersRef.current.size === 0) {
+      panRef.current = null;
+      queueMicrotask(() => onChange?.(valueRef.current));
+    }
+    syncInspectPointers();
     const el = zoomLayerRef.current;
     if (el?.releasePointerCapture) {
       try {
@@ -244,10 +298,24 @@ export function BeforeAfterSlider({
     return () => el.removeEventListener("wheel", onWheel);
   }, [isInspectMode]);
 
-  const trackTouchClass = isInspectMode ? "touch-pinch-pan" : "touch-pan-y-safe";
+  /** Track root size for screen-fixed divider clip + re-clamp pan on resize. */
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      setRootBox({ w: root.clientWidth, h: root.clientHeight });
+      if (isInspectMode) setInspectBoth(inspectRef.current);
+    });
+    ro.observe(root);
+    setRootBox({ w: root.clientWidth, h: root.clientHeight });
+    return () => ro.disconnect();
+  }, [isInspectMode]);
+
+  const trackTouchClass = isInspectMode ? "touch-none" : "touch-pan-y-safe";
 
   function onHandlePointerDown(e) {
     if (!allowDrag || !hasBefore || !hasAfter) return;
+    if (inspectActiveRef.current) return;
     onUserInteract?.();
     e.stopPropagation();
     draggingRef.current = true;
@@ -286,21 +354,73 @@ export function BeforeAfterSlider({
     draggingRef.current = false;
   }
 
+  const zoomTransform = {
+    transform: `translate(${inspect.x}px, ${inspect.y}px) scale(${inspect.s})`,
+    transformOrigin: "50% 50%",
+  };
+
+  const afterImg = (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img
+      src={afterUrl || beforeUrl}
+      alt=""
+      draggable={false}
+      decoding="async"
+      loading={eagerImages ? "eager" : "lazy"}
+      fetchPriority={eagerImages ? "high" : undefined}
+      className="yc-lux-photo pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center [transform:translateZ(0)]"
+    />
+  );
+
+  const beforeImg = hasBefore ? (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img
+      src={beforeUrl}
+      alt=""
+      draggable={false}
+      decoding="async"
+      loading={eagerImages ? "eager" : "lazy"}
+      fetchPriority={eagerImages ? "high" : undefined}
+      className="yc-lux-photo pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center [transform:translateZ(0)]"
+    />
+  ) : null;
+
+  const dividerOverlay =
+    hasBefore && hasAfter ? (
+      <div
+        className="pointer-events-none absolute inset-y-0 z-30"
+        style={{ left: `calc(${pct}% - 0.5px)` }}
+      >
+        <div className="h-full w-px bg-white/45 shadow-[0_0_0_1px_rgba(0,0,0,0.3)]" />
+        <button
+          type="button"
+          data-ba-handle
+          role="slider"
+          tabIndex={0}
+          aria-label="Drag to compare before and after"
+          aria-valuenow={Math.round(pct)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          className={[
+            handleOnlyDrag ? "pointer-events-auto touch-manipulation" : "pointer-events-none",
+            "absolute left-1/2 top-1/2 h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/28 bg-black/45 shadow-[0_8px_28px_-18px_rgba(0,0,0,0.9)] backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 sm:h-12 sm:w-12",
+          ].join(" ")}
+          onPointerDown={handleOnlyDrag ? onHandlePointerDown : undefined}
+          onPointerMove={handleOnlyDrag ? onHandlePointerMove : undefined}
+          onPointerUp={handleOnlyDrag ? onHandlePointerUp : undefined}
+          onPointerCancel={handleOnlyDrag ? onHandlePointerUp : undefined}
+          onLostPointerCapture={handleOnlyDrag ? onDragLostPointerCapture : undefined}
+        >
+          <span className="absolute inset-0 grid place-items-center text-white/85">
+            <HandleArrows />
+          </span>
+        </button>
+      </div>
+    ) : null;
+
   const comparisonInner = (
     <>
-      {/* Base layer — full width, visible on the RIGHT = After */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={afterUrl || beforeUrl}
-        alt=""
-        draggable={false}
-        decoding="async"
-        loading={eagerImages ? "eager" : "lazy"}
-        fetchPriority={eagerImages ? "high" : undefined}
-        className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center [transform:translateZ(0)]"
-      />
-
-      {/* Clipped layer — revealed on the LEFT = Before */}
+      {afterImg}
       {hasBefore ? (
         <div
           className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -309,52 +429,13 @@ export function BeforeAfterSlider({
             WebkitClipPath: `inset(0 ${100 - pct}% 0 0)`,
           }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={beforeUrl}
-            alt=""
-            draggable={false}
-            decoding="async"
-            loading={eagerImages ? "eager" : "lazy"}
-            fetchPriority={eagerImages ? "high" : undefined}
-            className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center [transform:translateZ(0)]"
-          />
+          {beforeImg}
         </div>
       ) : null}
-
-      {hasBefore && hasAfter ? (
-        <div
-          className="pointer-events-none absolute inset-y-0 z-10"
-          style={{ left: `calc(${pct}% - 0.5px)` }}
-        >
-          <div className="h-full w-px bg-white/45 shadow-[0_0_0_1px_rgba(0,0,0,0.3)]" />
-          <button
-            type="button"
-            data-ba-handle
-            role="slider"
-            tabIndex={0}
-            aria-label="Drag to compare before and after"
-            aria-valuenow={Math.round(pct)}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            className={[
-              handleOnlyDrag ? "pointer-events-auto touch-manipulation" : "pointer-events-none",
-              "absolute left-1/2 top-1/2 h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/28 bg-black/45 shadow-[0_8px_28px_-18px_rgba(0,0,0,0.9)] backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 sm:h-12 sm:w-12",
-            ].join(" ")}
-            onPointerDown={handleOnlyDrag ? onHandlePointerDown : undefined}
-            onPointerMove={handleOnlyDrag ? onHandlePointerMove : undefined}
-            onPointerUp={handleOnlyDrag ? onHandlePointerUp : undefined}
-            onPointerCancel={handleOnlyDrag ? onHandlePointerUp : undefined}
-            onLostPointerCapture={handleOnlyDrag ? onDragLostPointerCapture : undefined}
-          >
-            <span className="absolute inset-0 grid place-items-center text-white/85">
-              <HandleArrows />
-            </span>
-          </button>
-        </div>
-      ) : null}
+      {!isInspectMode ? dividerOverlay : null}
     </>
   );
+
 
   return (
     <div
@@ -377,7 +458,10 @@ export function BeforeAfterSlider({
             ? "h-full w-full bg-black"
             : "rounded-2xl border border-card-border bg-black/20 shadow-[0_0_0_1px_rgba(0,0,0,0.35),0_24px_60px_-45px_rgba(0,0,0,0.8)]",
         ].join(" ")}
-        style={aspect === "fill" ? undefined : { aspectRatio: aspect }}
+        style={{
+          ...(aspect === "fill" ? {} : { aspectRatio: aspect }),
+          ...(rootBox.w > 0 ? { "--ba-root-w": `${rootBox.w}px` } : {}),
+        }}
         onPointerDown={handleOnlyDrag ? undefined : onTrackPointerDown}
         onPointerMove={handleOnlyDrag ? undefined : onTrackPointerMove}
         onPointerUp={handleOnlyDrag ? undefined : onTrackPointerUp}
@@ -387,22 +471,37 @@ export function BeforeAfterSlider({
         {hasAny ? (
           <>
             {isInspectMode ? (
-              <div
-                ref={zoomLayerRef}
-                className="touch-pinch-pan absolute inset-0 h-full w-full"
-                style={{
-                  transform: `translate(${inspect.x}px, ${inspect.y}px) scale(${inspect.s})`,
-                  transformOrigin: "50% 50%",
-                }}
-                onPointerDown={onInspectPointerDown}
-                onPointerMove={onInspectPointerMove}
-                onPointerUp={onInspectPointerUp}
-                onPointerCancel={onInspectPointerUp}
-              >
-                <div className="relative h-full w-full" data-ba-compare-surface>
-                  {comparisonInner}
+              <>
+                <div
+                  ref={zoomLayerRef}
+                  className="touch-none absolute inset-0 h-full w-full"
+                  onPointerDown={onInspectPointerDown}
+                  onPointerMove={onInspectPointerMove}
+                  onPointerUp={onInspectPointerUp}
+                  onPointerCancel={onInspectPointerUp}
+                >
+                  <div
+                    className="absolute inset-0 h-full will-change-transform"
+                    style={zoomTransform}
+                  >
+                    {afterImg}
+                  </div>
+                  {hasBefore ? (
+                    <div
+                      className="pointer-events-none absolute inset-y-0 left-0 z-[1] overflow-hidden"
+                      style={{ width: `${pct}%` }}
+                    >
+                      <div
+                        className="absolute left-0 top-0 h-full w-[var(--ba-root-w,100%)] will-change-transform"
+                        style={zoomTransform}
+                      >
+                        {beforeImg}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
-              </div>
+                {dividerOverlay}
+              </>
             ) : (
               <div className="relative h-full w-full">{comparisonInner}</div>
             )}

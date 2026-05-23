@@ -27,8 +27,8 @@ function PhoneIcon() {
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-white/8 bg-background/80 backdrop-blur-md">
-      <Container className="flex min-h-15 items-center justify-between gap-4 py-3 sm:min-h-18 sm:py-3.5">
-        <Logo variant="header" />
+      <Container className="flex min-h-15 items-center justify-between gap-4 overflow-visible py-3 sm:min-h-18 sm:py-3.5">
+        <Logo variant="horizontal" className="overflow-visible" />
 
         <nav className="hidden items-center gap-6 lg:flex">
           {landingContent.nav.map((item) => (
@@ -69,7 +69,7 @@ export function SiteHeader() {
 
           <Button
             href="#quote"
-            className="inline-flex shrink-0 px-3.5 py-2 text-[11px] sm:px-4 sm:text-[12px]"
+            className="inline-flex max-w-[8.25rem] shrink whitespace-normal px-3 py-2 text-center text-[10px] leading-[1.25] sm:max-w-none sm:whitespace-nowrap sm:px-4 sm:text-[12px] sm:leading-normal"
           >
             Request Your Custom Plan
           </Button>

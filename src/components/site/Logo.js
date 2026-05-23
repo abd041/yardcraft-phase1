@@ -8,9 +8,9 @@ function cx(...parts) {
 }
 
 /**
- * @param {"nav" | "header" | "footer" | "icon" | "mark" | "auth"} [variant="nav"]
- * — header/footer: logomark + green/gold wordmark & tagline (footer shows wordmark at all widths);
- *   nav: mark + wordmark; icon: mark only; mark: larger mark; auth: stacked sign-in.
+ * @param {"nav" | "header" | "footer" | "horizontal" | "icon" | "mark" | "auth"} [variant="nav"]
+ * — horizontal: homepage nav/footer lockup image;
+ *   header/footer: logomark + wordmark; nav: mark + wordmark; icon/mark/auth: as labeled.
  */
 export function Logo({ variant = "nav", className }) {
   const mark = (imgClass, src = "/images/YardCraftLogo.png") => (
@@ -23,6 +23,25 @@ export function Logo({ variant = "nav", className }) {
       priority
     />
   );
+
+  if (variant === "horizontal") {
+    return (
+      <Link
+        href="/"
+        className={cx("inline-flex shrink-0", className)}
+        aria-label={`${BRAND.name} home`}
+      >
+        <Image
+          src="/images/horizontal-logo.png"
+          alt={BRAND.name}
+          width={300}
+          height={72}
+          className="h-9 w-auto origin-left scale-[2.5] object-contain object-left sm:h-10"
+          priority
+        />
+      </Link>
+    );
+  }
 
   if (variant === "header" || variant === "footer") {
     const isHeader = variant === "header";

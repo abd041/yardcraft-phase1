@@ -51,13 +51,13 @@ function ServiceCard({ item }) {
             alt={item.title}
             fill
             sizes="(max-width: 768px) 280px, (max-width: 1200px) 20vw, 17vw"
-            className="object-cover object-center"
+            className="yc-lux-photo object-cover object-center"
           />
         </div>
       </div>
 
       {/* Cinematic overlay — warm, dark at bottom, breathes on hover */}
-      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/42 to-black/16 transition-opacity duration-500 group-hover:opacity-85" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/72 via-black/36 to-black/12 transition-opacity duration-500 group-hover:opacity-90" />
 
       {/* Subtle gold warmth glow at base on hover */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(ellipse_90%_60%_at_50%_110%,rgba(214,178,94,0.10),transparent_70%)]" />

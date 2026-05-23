@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { AdminShell } from "@/components/admin/AdminShell";
 import { listDesigns } from "@/lib/designs";
 import { AdminDesignsClient } from "@/components/admin/AdminDesignsClient";
@@ -17,7 +19,9 @@ export default async function Page() {
   
   return (
     <AdminShell title="Designs">
-      <AdminDesignsClient initialDesigns={designs} />
+      <Suspense fallback={null}>
+        <AdminDesignsClient initialDesigns={designs} />
+      </Suspense>
     </AdminShell>
   );
 }

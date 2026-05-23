@@ -1,16 +1,19 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/Button";
 import { ToastHost } from "@/components/ui/ToastHost";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
-
-function normalizeSlug(slug) {
-  return typeof slug === "string" ? slug.trim() : "";
-}
+import {
+  formatDesignNumber,
+  getDesignNumber,
+  getNextDesignSlug,
+  isValidDesignSlug,
+  resolveDesignSlug,
+} from "@/lib/designSlug";
 
 function cx(...parts) {
   return parts.filter(Boolean).join(" ");
@@ -46,6 +49,67 @@ function toneClasses(tone) {
   return "border-card-border bg-black/10 text-muted";
 }
 
+function slugNumericOrder(slug) {
+  const n = getDesignNumber(slug);
+  return n != null ? n : Number.POSITIVE_INFINITY;
+}
+
+function compareSlugNumericAsc(a, b) {
+  const na = slugNumericOrder(a.slug);
+  const nb = slugNumericOrder(b.slug);
+  if (na !== nb) return na - nb;
+  return (a.slug || "").localeCompare(b.slug || "", undefined, { numeric: true, sensitivity: "base" });
+}
+
+function designCreatedAtMs(d) {
+  const raw = d?.created_at || d?.updated_at;
+  if (!raw) return null;
+  const ms = new Date(raw).getTime();
+  return Number.isNaN(ms) ? null : ms;
+}
+
+function parseDateRangeStart(dateStr) {
+  if (!dateStr) return null;
+  const ms = new Date(`${dateStr}T00:00:00`).getTime();
+  return Number.isNaN(ms) ? null : ms;
+}
+
+function parseDateRangeEnd(dateStr) {
+  if (!dateStr) return null;
+  const ms = new Date(`${dateStr}T23:59:59.999`).getTime();
+  return Number.isNaN(ms) ? null : ms;
+}
+
+function matchesCreatedRange(d, fromStr, toStr) {
+  const fromMs = parseDateRangeStart(fromStr);
+  const toMs = parseDateRangeEnd(toStr);
+  if (fromMs == null && toMs == null) return true;
+  const created = designCreatedAtMs(d);
+  if (created == null) return false;
+  if (fromMs != null && created < fromMs) return false;
+  if (toMs != null && created > toMs) return false;
+  return true;
+}
+
+function matchesDesignNumberRange(slug, minStr, maxStr) {
+  const minRaw = minStr.trim();
+  const maxRaw = maxStr.trim();
+  if (!minRaw && !maxRaw) return true;
+  const num = slugNumericOrder(slug);
+  if (num === Number.POSITIVE_INFINITY) return false;
+  let min = minRaw ? Number.parseInt(minRaw, 10) : null;
+  let max = maxRaw ? Number.parseInt(maxRaw, 10) : null;
+  if (min != null && Number.isNaN(min)) min = null;
+  if (max != null && Number.isNaN(max)) max = null;
+  if (min != null && max != null && min > max) [min, max] = [max, min];
+  if (min != null && num < min) return false;
+  if (max != null && num > max) return false;
+  return true;
+}
+
+const RANGE_INPUT_CLASS =
+  "w-full rounded-xl border border-card-border bg-card px-3 py-2 text-[12px] text-foreground placeholder:text-muted shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)] focus:outline-none focus:ring-2 focus:ring-gold/50";
+
 function sortDesigns(designs, sortKey) {
   const copy = designs.slice();
   const byUpdated = (a, b) => {
@@ -59,28 +123,47 @@ function sortDesigns(designs, sortKey) {
       const sa = computeStatus(a).pct;
       const sb = computeStatus(b).pct;
       if (sb !== sa) return sb - sa;
-      return byUpdated(a, b);
+      return compareSlugNumericAsc(a, b);
     });
   }
 
-  // default: recent
-  return copy.sort(byUpdated);
+  if (sortKey === "recent") {
+    return copy.sort(byUpdated);
+  }
+
+  // default: slug number ascending (design 1, 2, 3…)
+  return copy.sort(compareSlugNumericAsc);
 }
 
 export function AdminDesignsClient({ initialDesigns }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const slugFromUrl = useMemo(() => normalizeSlug(searchParams.get("slug")), [searchParams]);
+  const selectedSlug = useMemo(
+    () => resolveDesignSlug(searchParams.get("slug") ?? "") ?? "",
+    [searchParams],
+  );
   const [query, setQuery] = useState("");
-  const [manualSlug, setManualSlug] = useState("");
-  const selectedSlug = slugFromUrl || manualSlug;
+
+  function selectSlug(slug) {
+    const next = resolveDesignSlug(slug);
+    const params = new URLSearchParams(searchParams.toString());
+    if (next) params.set("slug", next);
+    else params.delete("slug");
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
   const [designs, setDesigns] = useState(Array.isArray(initialDesigns) ? initialDesigns : []);
   const [busy, setBusy] = useState(null);
   const [error, setError] = useState("");
   const [toasts, setToasts] = useState([]);
   const [progress, setProgress] = useState(null);
   const [filter, setFilter] = useState("all"); // all | ready | draft | needs
-  const [sort, setSort] = useState("recent"); // recent | completion
-  const [createSlug, setCreateSlug] = useState("");
+  const [sort, setSort] = useState("slug"); // slug | recent | completion
+  const [createdFrom, setCreatedFrom] = useState("");
+  const [createdTo, setCreatedTo] = useState("");
+  const [designNumMin, setDesignNumMin] = useState("");
+  const [designNumMax, setDesignNumMax] = useState("");
 
   const toastIdRef = useRef(0);
 
@@ -94,9 +177,16 @@ export function AdminDesignsClient({ initialDesigns }) {
   }
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    let list = designs;
-    if (q) list = list.filter((d) => (d.slug || "").toLowerCase().includes(q));
+    const q = query.trim();
+    let list = designs.filter((d) => isValidDesignSlug(d.slug));
+    if (q) {
+      if (/^\d+$/.test(q)) {
+        const num = Number.parseInt(q, 10);
+        list = list.filter((d) => getDesignNumber(d.slug) === num);
+      } else {
+        list = [];
+      }
+    }
     if (filter === "ready") list = list.filter((d) => computeStatus(d).key === "ready");
     if (filter === "draft") list = list.filter((d) => computeStatus(d).key === "draft");
     if (filter === "needs") {
@@ -105,11 +195,21 @@ export function AdminDesignsClient({ initialDesigns }) {
         return st === "missing_before" || st === "missing_after";
       });
     }
+    if (createdFrom || createdTo) {
+      list = list.filter((d) => matchesCreatedRange(d, createdFrom, createdTo));
+    }
+    if (designNumMin.trim() || designNumMax.trim()) {
+      list = list.filter((d) => matchesDesignNumberRange(d.slug, designNumMin, designNumMax));
+    }
     return sortDesigns(list, sort);
-  }, [designs, filter, query, sort]);
+  }, [designs, filter, query, sort, createdFrom, createdTo, designNumMin, designNumMax]);
+
+  const hasRangeFilters = Boolean(
+    createdFrom || createdTo || designNumMin.trim() || designNumMax.trim(),
+  );
 
   const selected = useMemo(() => {
-    const slug = normalizeSlug(selectedSlug);
+    const slug = resolveDesignSlug(selectedSlug);
     if (!slug) return null;
     return designs.find((d) => d.slug === slug) ?? null;
   }, [designs, selectedSlug]);
@@ -147,10 +247,10 @@ export function AdminDesignsClient({ initialDesigns }) {
 
   async function upload(kind, file) {
     setError("");
-    const slug = normalizeSlug(selectedSlug);
+    const slug = resolveDesignSlug(selectedSlug);
     if (!slug) {
-      setError("Pick a design slug first.");
-      pushToast({ type: "error", title: "Select a slug first" });
+      setError("Pick a property number first.");
+      pushToast({ type: "error", title: "Select a property first" });
       return;
     }
     if (!file) {
@@ -181,7 +281,7 @@ export function AdminDesignsClient({ initialDesigns }) {
       pushToast({
         type: "success",
         title: `${kind === "before" ? "Before" : "After"} image saved`,
-        message: slug,
+        message: formatDesignNumber(slug),
       });
     } catch (e) {
       setError(e?.message || "Upload failed");
@@ -197,8 +297,7 @@ export function AdminDesignsClient({ initialDesigns }) {
   }
 
   async function createNewSlug() {
-    const slug = normalizeSlug(createSlug);
-    if (!slug) return;
+    const slug = getNextDesignSlug(designs);
     setError("");
     setBusy(`create:${slug}`);
     try {
@@ -215,9 +314,12 @@ export function AdminDesignsClient({ initialDesigns }) {
         if (exists) return prev;
         return [next, ...prev];
       });
-      setManualSlug(next.slug);
-      setCreateSlug("");
-      pushToast({ type: "success", title: "Slug created", message: next.slug });
+      selectSlug(next.slug);
+      pushToast({
+        type: "success",
+        title: "Property created",
+        message: formatDesignNumber(next.slug),
+      });
     } catch (e) {
       pushToast({ type: "error", title: "Create failed", message: e?.message || "Try again" });
       setError(e?.message || "Create failed");
@@ -227,7 +329,7 @@ export function AdminDesignsClient({ initialDesigns }) {
   }
 
   async function clearImage(kind) {
-    const slug = normalizeSlug(selectedSlug);
+    const slug = resolveDesignSlug(selectedSlug);
     if (!slug) return;
     setError("");
     setBusy(`clear:${kind}:${slug}`);
@@ -242,7 +344,7 @@ export function AdminDesignsClient({ initialDesigns }) {
 
       const next = json.design;
       setDesigns((prev) => prev.map((d) => (d.slug === next.slug ? next : d)));
-      pushToast({ type: "success", title: "Image removed", message: slug });
+      pushToast({ type: "success", title: "Image removed", message: formatDesignNumber(slug) });
     } catch (e) {
       pushToast({ type: "error", title: "Remove failed", message: e?.message || "Try again" });
       setError(e?.message || "Remove failed");
@@ -268,34 +370,28 @@ export function AdminDesignsClient({ initialDesigns }) {
             </div>
           </div>
           <span className="rounded-full border border-card-border bg-background/70 px-3 py-1 text-[11px] font-semibold tracking-wide text-muted">
-            {designs.length} total
+            {filtered.length === designs.length
+              ? `${designs.length} total`
+              : `${filtered.length} of ${designs.length}`}
           </span>
         </div>
 
         <div className="mt-4 grid gap-3">
-          <div className="grid grid-cols-[1fr_auto] gap-2">
-            <input
-              value={createSlug}
-              onChange={(e) => setCreateSlug(e.target.value)}
-              placeholder="Create new slug… (e.g. design003)"
-              className="w-full rounded-2xl border border-card-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)] focus:outline-none focus:ring-2 focus:ring-gold/50"
-            />
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={!normalizeSlug(createSlug) || String(busy || "").startsWith("create:")}
-              onClick={createNewSlug}
-              className="justify-center"
-            >
-              New
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={String(busy || "").startsWith("create:")}
+            onClick={createNewSlug}
+            className="w-full justify-center"
+          >
+            Add Slug
+          </Button>
 
           <div>
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by slug…"
+              placeholder="Search by number…"
               className="w-full rounded-2xl border border-card-border bg-card px-10 py-3 text-sm text-foreground placeholder:text-muted shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)] focus:outline-none focus:ring-2 focus:ring-gold/50"
             />
             <div className="pointer-events-none -mt-9 ml-3 h-6 w-6 text-muted">
@@ -324,10 +420,78 @@ export function AdminDesignsClient({ initialDesigns }) {
                 onChange={(e) => setSort(e.target.value)}
                 className="rounded-full border border-card-border bg-card px-3 py-1 text-[11px] text-foreground focus:outline-none focus:ring-2 focus:ring-gold/50"
               >
+                <option value="slug">Slug (1, 2, 3…)</option>
                 <option value="recent">Recently updated</option>
                 <option value="completion">Completion</option>
               </select>
             </span>
+          </div>
+
+          <div className="rounded-2xl border border-card-border bg-card/40 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+              Filters
+            </div>
+
+            <div className="mt-2.5">
+              <label className="text-[11px] font-medium text-muted">Created between</label>
+              <div className="mt-1.5 grid grid-cols-2 gap-2">
+                <input
+                  type="date"
+                  value={createdFrom}
+                  onChange={(e) => setCreatedFrom(e.target.value)}
+                  aria-label="Created from date"
+                  className={RANGE_INPUT_CLASS}
+                />
+                <input
+                  type="date"
+                  value={createdTo}
+                  onChange={(e) => setCreatedTo(e.target.value)}
+                  aria-label="Created to date"
+                  className={RANGE_INPUT_CLASS}
+                />
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <label className="text-[11px] font-medium text-muted">Design number</label>
+              <div className="mt-1.5 grid grid-cols-2 gap-2">
+                <input
+                  type="number"
+                  min={1}
+                  inputMode="numeric"
+                  value={designNumMin}
+                  onChange={(e) => setDesignNumMin(e.target.value)}
+                  placeholder="From (e.g. 20)"
+                  aria-label="Design number from"
+                  className={RANGE_INPUT_CLASS}
+                />
+                <input
+                  type="number"
+                  min={1}
+                  inputMode="numeric"
+                  value={designNumMax}
+                  onChange={(e) => setDesignNumMax(e.target.value)}
+                  placeholder="To (e.g. 40)"
+                  aria-label="Design number to"
+                  className={RANGE_INPUT_CLASS}
+                />
+              </div>
+            </div>
+
+            {hasRangeFilters ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setCreatedFrom("");
+                  setCreatedTo("");
+                  setDesignNumMin("");
+                  setDesignNumMax("");
+                }}
+                className="mt-3 text-[11px] font-semibold text-muted underline-offset-2 transition hover:text-foreground hover:underline"
+              >
+                Clear range filters
+              </button>
+            ) : null}
           </div>
         </div>
 
@@ -344,7 +508,7 @@ export function AdminDesignsClient({ initialDesigns }) {
                   data-stagger
                   key={d.slug}
                   type="button"
-                  onClick={() => setManualSlug(d.slug)}
+                  onClick={() => selectSlug(d.slug)}
                   className={cx(
                     "w-full rounded-3xl border px-3 py-3 text-left transition",
                     active
@@ -367,8 +531,8 @@ export function AdminDesignsClient({ initialDesigns }) {
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
-                        <div className="truncate text-sm font-semibold tracking-tight text-foreground">
-                          {d.slug}
+                        <div className="text-lg font-semibold tabular-nums tracking-tight text-foreground">
+                          {formatDesignNumber(d.slug)}
                         </div>
                         <span
                           className={cx(
@@ -426,8 +590,8 @@ export function AdminDesignsClient({ initialDesigns }) {
             <div>
               <div className="text-xs font-semibold tracking-wide text-muted">Selected property</div>
               <div className="mt-1 flex flex-wrap items-center gap-2">
-                <div className="text-xl font-semibold tracking-tight text-foreground">
-                  {selected?.slug || "—"}
+                <div className="text-2xl font-semibold tabular-nums tracking-tight text-foreground">
+                  {selected?.slug ? formatDesignNumber(selected.slug) : "—"}
                 </div>
                 {selected?.slug ? (
                   <span
@@ -449,7 +613,7 @@ export function AdminDesignsClient({ initialDesigns }) {
                 </div>
               ) : (
                 <div className="mt-2 text-xs text-muted">
-                  Pick a slug on the left to manage before/after assets.
+                  Pick a property number on the left to manage before/after assets.
                 </div>
               )}
             </div>
@@ -464,7 +628,11 @@ export function AdminDesignsClient({ initialDesigns }) {
                   onClick={() => {
                     const url = `${window.location.origin}${publicUrl}`;
                     navigator.clipboard?.writeText(url);
-                    pushToast({ type: "success", title: "Copied link", message: selected.slug });
+                    pushToast({
+                      type: "success",
+                      title: "Copied link",
+                      message: formatDesignNumber(selected.slug),
+                    });
                   }}
                   className="inline-flex items-center justify-center rounded-full border border-card-border bg-card px-4 py-3 text-sm font-semibold tracking-tight text-foreground transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
                 >

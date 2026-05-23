@@ -2,6 +2,7 @@ import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { BRAND } from "@/lib/brand";
+import { formatDesignNumber } from "@/lib/designSlug";
 import { Logo } from "@/components/site/Logo";
 import { BeforeAfterSlider } from "@/components/design/BeforeAfterSlider";
 import { Reveal } from "@/components/motion/Reveal";
@@ -55,7 +56,7 @@ export function DesignHeroSection({ slug, beforeUrl, afterUrl }) {
                 Licensed • Insured • Local
               </span>
               <span className="rounded-full border border-card-border bg-black/10 px-3 py-1 text-[11px] font-medium tracking-wide text-muted">
-                Ref: {slug}
+                {formatDesignNumber(slug)}
               </span>
             </Reveal>
 

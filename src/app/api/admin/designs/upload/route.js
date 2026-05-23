@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabaseAdmin";
+import { resolveDesignSlug } from "@/lib/designSlug";
 import { upsertDesign } from "@/lib/designs";
 import { requireAdminApi } from "@/lib/authApi";
 
@@ -8,10 +9,6 @@ export const runtime = "nodejs";
 
 function getBucket() {
   return (process.env.SUPABASE_STORAGE_BUCKET || "design-images").trim();
-}
-
-function normalizeSlug(slug) {
-  return typeof slug === "string" ? slug.trim() : "";
 }
 
 export async function POST(request) {
@@ -34,12 +31,15 @@ export async function POST(request) {
   }
 
   const form = await request.formData();
-  const slug = normalizeSlug(form.get("slug"));
+  const slug = resolveDesignSlug(form.get("slug"));
   const kind = typeof form.get("kind") === "string" ? form.get("kind") : "";
   const file = form.get("file");
 
   if (!slug) {
-    return NextResponse.json({ ok: false, error: "missing_slug" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "invalid_slug", message: "Numeric design id required (e.g. design28)." },
+      { status: 400 },
+    );
   }
   if (kind !== "before" && kind !== "after") {
     return NextResponse.json(

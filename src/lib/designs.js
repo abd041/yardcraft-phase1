@@ -1,3 +1,4 @@
+import { assertValidDesignSlug, resolveDesignSlug } from "@/lib/designSlug";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabaseAdmin";
 
 const TABLE = "designs";
@@ -5,8 +6,7 @@ const BASE_SELECT = "slug,before_image,after_image,created_at";
 const AUDIT_SELECT = "slug,before_image,after_image,created_at,updated_at,updated_by";
 
 function normalizeSlug(slug) {
-  const s = typeof slug === "string" ? slug.trim() : "";
-  return s;
+  return resolveDesignSlug(slug) ?? "";
 }
 
 export async function listDesigns() {
@@ -66,8 +66,7 @@ export async function upsertDesign(input) {
     throw new Error("Supabase is not configured (missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY).");
   }
 
-  const slug = normalizeSlug(input?.slug);
-  if (!slug) throw new Error("upsertDesign requires a non-empty slug");
+  const slug = assertValidDesignSlug(input?.slug);
 
   const payload = { slug };
   if (typeof input?.before_image === "string") payload.before_image = input.before_image.trim();
@@ -92,8 +91,7 @@ export async function updateDesignBySlug(slug, patch) {
     throw new Error("Supabase is not configured (missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY).");
   }
 
-  const s = normalizeSlug(slug);
-  if (!s) throw new Error("updateDesignBySlug requires a non-empty slug");
+  const s = assertValidDesignSlug(slug);
 
   const updates = {};
   // Safe updates:

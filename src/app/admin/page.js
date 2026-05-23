@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { AdminShell } from "@/components/admin/AdminShell";
 import { requireAdmin } from "@/lib/auth";
+import { formatDesignNumber } from "@/lib/designSlug";
 import { listDesigns } from "@/lib/designs";
 
 export const dynamic = "force-dynamic";
@@ -176,8 +177,8 @@ function RecentCard({ design }) {
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-semibold tracking-tight text-foreground group-hover:text-foreground">
-          {design.slug}
+        <div className="text-base font-semibold tabular-nums tracking-tight text-foreground">
+          {formatDesignNumber(design.slug)}
         </div>
         <span className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${badgeClass}`}>
           {badgeLabel}

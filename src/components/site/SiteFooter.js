@@ -15,16 +15,19 @@ function PhoneIcon() {
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-card-border/50 bg-black/25">
+    <footer className="border-t border-card-border/50 bg-black/25 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <Container className="py-9 sm:py-10">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-6 lg:gap-10">
-          <Logo variant="footer" />
+        {/* Mobile + tablet: stacked left · Desktop (lg+): logo | contact center | copyright */}
+        <div className="flex flex-col items-start gap-8 text-left lg:grid lg:grid-cols-3 lg:items-center lg:gap-10">
+          <Logo
+            variant="horizontal"
+            className="origin-left overflow-visible lg:justify-self-start"
+          />
 
-          {/* Phone + location — centered */}
-          <div className="flex flex-col items-start gap-1.5 sm:items-center">
+          <div className="flex flex-col items-start gap-1.5 lg:items-center lg:justify-self-center">
             <a
               href={`tel:${BRAND.phoneTel}`}
-              className="flex items-center gap-2 text-sm font-medium text-foreground/80 transition hover:text-foreground"
+              className="inline-flex items-center gap-2 text-sm font-medium text-foreground/80 transition hover:text-foreground lg:justify-center"
             >
               <PhoneIcon />
               {BRAND.phoneDisplay}
@@ -32,8 +35,7 @@ export function SiteFooter() {
             <p className="text-xs text-muted">Serving Northern Virginia</p>
           </div>
 
-          {/* Copyright — right aligned */}
-          <p className="text-xs text-muted sm:text-right">
+          <p className="text-xs text-muted lg:justify-self-end lg:text-right">
             © {new Date().getFullYear()} {BRAND.legalEntity}. All rights reserved.
           </p>
         </div>

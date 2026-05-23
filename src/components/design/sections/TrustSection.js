@@ -152,7 +152,7 @@ function PhotoSlot({ label, src }) {
           src={src}
           alt={label}
           loading="lazy"
-          className="aspect-4/3 w-full rounded-2xl object-cover object-center"
+          className="yc-lux-photo aspect-4/3 w-full rounded-2xl object-cover object-center"
         />
       ) : (
         <div className="aspect-4/3 w-full rounded-2xl border border-white/11 bg-white/[0.035]" />

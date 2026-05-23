@@ -100,6 +100,36 @@ export function PremiumBeforeAfter({
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  /** Lock page scroll while fullscreen is open — prevents horizontal drift after pinch. */
+  useEffect(() => {
+    if (!open) return;
+    const scrollY = window.scrollY;
+    const { style } = document.body;
+    const prev = {
+      position: style.position,
+      top: style.top,
+      left: style.left,
+      right: style.right,
+      overflow: style.overflow,
+      width: style.width,
+    };
+    style.position = "fixed";
+    style.top = `-${scrollY}px`;
+    style.left = "0";
+    style.right = "0";
+    style.width = "100%";
+    style.overflow = "hidden";
+    return () => {
+      style.position = prev.position;
+      style.top = prev.top;
+      style.left = prev.left;
+      style.right = prev.right;
+      style.overflow = prev.overflow;
+      style.width = prev.width;
+      window.scrollTo(0, scrollY);
+    };
+  }, [open]);
+
   // In landscape mobile (no fullscreen), drop the dvh height constraint
   // from the parent and let the slider set its own height via aspect ratio.
   // This prevents the 5:1 ultra-wide cinematic crop that dvh causes in landscape.
@@ -113,50 +143,49 @@ export function PremiumBeforeAfter({
       <div className={outerClass}>
         {isLandscapeMobile ? (
           /* ── Landscape mobile: natural 16/9 ratio ── */
-          <div className="relative w-full">
+          <div className="relative w-full overflow-hidden">
             <BeforeAfterSlider
               beforeUrl={beforeUrl}
               afterUrl={afterUrl}
               beforeLabel={beforeLabel}
               afterLabel={afterLabel}
-              initial={value}
+              initial={open ? null : value}
               aspect="16/9"
-              onChange={onChange}
+              onChange={open ? undefined : onChange}
               chromeless
               handleOnlyDrag
               eagerImages
               className="w-full"
             />
             {hasAny ? <FullscreenButton onClick={() => setOpen(true)} /> : null}
+            <RotateHint visible={!open && portraitMobileHint} />
           </div>
         ) : (
           /* ── Portrait / desktop: fill the dvh container ── */
-          <div className="relative h-full min-h-0 w-full">
+          <div className="relative h-full min-h-0 w-full overflow-hidden">
             <BeforeAfterSlider
               beforeUrl={beforeUrl}
               afterUrl={afterUrl}
               beforeLabel={beforeLabel}
               afterLabel={afterLabel}
-              initial={value}
+              initial={open ? null : value}
               aspect="fill"
-              onChange={onChange}
+              onChange={open ? undefined : onChange}
               chromeless
               handleOnlyDrag
               eagerImages
               className="h-full min-h-0 w-full bg-black/0"
             />
             {hasAny ? <FullscreenButton onClick={() => setOpen(true)} /> : null}
+            <RotateHint visible={!open && portraitMobileHint} />
           </div>
         )}
       </div>
 
-      {/* Always show rotate hint on portrait mobile outside fullscreen */}
-      <RotateHint visible={!open && portraitMobileHint} fixed />
-
       {open ? (
         <div
           className={cx(
-            "fixed inset-0 z-100 overscroll-y-auto bg-black/91 backdrop-blur-sm transition-opacity duration-500 ease-in-out",
+            "fixed inset-0 z-100 touch-none overflow-hidden overscroll-none bg-black/91 backdrop-blur-sm transition-opacity duration-500 ease-in-out",
             fullscreenVisible ? "opacity-100" : "opacity-0",
           )}
           role="dialog"
@@ -166,23 +195,26 @@ export function PremiumBeforeAfter({
           <div className="absolute inset-0 z-0" onClick={() => setOpen(false)} />
           <div
             className={cx(
-              "absolute inset-0 z-10 transition duration-500 ease-in-out",
+              "absolute inset-0 z-10 overflow-hidden transition duration-500 ease-in-out",
               fullscreenVisible ? "scale-100 opacity-100" : "scale-[0.96] opacity-0",
             )}
           >
-            <BeforeAfterSlider
-              beforeUrl={beforeUrl}
-              afterUrl={afterUrl}
-              beforeLabel={beforeLabel}
-              afterLabel={afterLabel}
-              initial={value}
-              aspect="fill"
-              onChange={onChange}
-              chromeless
-              handleOnlyDrag
-              allowPinchZoom
-              className="h-full w-full"
-            />
+            <div className="relative h-full w-full">
+              <BeforeAfterSlider
+                beforeUrl={beforeUrl}
+                afterUrl={afterUrl}
+                beforeLabel={beforeLabel}
+                afterLabel={afterLabel}
+                initial={value}
+                aspect="fill"
+                onChange={onChange}
+                chromeless
+                handleOnlyDrag
+                allowPinchZoom
+                className="h-full w-full"
+              />
+              <RotateHint visible={showRotateHint} />
+            </div>
           </div>
 
           <button
@@ -193,7 +225,6 @@ export function PremiumBeforeAfter({
           >
             <CloseIcon />
           </button>
-          <RotateHint visible={showRotateHint} />
         </div>
       ) : null}
     </>
@@ -236,14 +267,11 @@ function CloseIcon() {
   );
 }
 
-function RotateHint({ visible, fixed = false }) {
+function RotateHint({ visible }) {
   if (!visible) return null;
   return (
     <div
-      className={cx(
-        "lux-rotate-hint pointer-events-none left-1/2 z-30 flex -translate-x-1/2 items-center rounded-full border border-white/22 bg-black/65 px-5 py-2.5 text-[12px] font-semibold tracking-[0.12em] text-white shadow-[0_20px_50px_-28px_rgba(0,0,0,0.92),0_0_0_1px_rgba(255,255,255,0.1)_inset] backdrop-blur-sm sm:px-6 sm:text-[13px] md:hidden",
-        fixed ? "fixed bottom-10" : "absolute bottom-24 sm:bottom-28",
-      )}
+      className="lux-rotate-hint pointer-events-none absolute bottom-20 left-1/2 z-30 flex w-max max-w-[calc(100%-2rem)] -translate-x-1/2 items-center rounded-full border border-white/22 bg-black/65 px-5 py-2.5 text-[12px] font-semibold tracking-[0.12em] text-white shadow-[0_20px_50px_-28px_rgba(0,0,0,0.92),0_0_0_1px_rgba(255,255,255,0.1)_inset] backdrop-blur-sm sm:bottom-24 sm:px-6 sm:text-[13px] md:hidden"
     >
       <span className="mr-2.5 inline-flex h-5 w-5 shrink-0 items-center justify-center sm:h-6 sm:w-6">
         <svg viewBox="0 0 24 24" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" aria-hidden="true">
