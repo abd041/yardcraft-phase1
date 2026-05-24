@@ -108,6 +108,14 @@ export function BeforeAfterSlider({
   const pinchRef = useRef(null);
   const panRef = useRef(null);
   const inspectActiveRef = useRef(false);
+  const rootBoxRef = useRef({ w: 0, h: 0 });
+  const remeasureRafRef = useRef(0);
+  const onChangeRef = useRef(onChange);
+
+  useLayoutEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
   const [rootBox, setRootBox] = useState({ w: 0, h: 0 });
 
   function setInspectBoth(next) {
@@ -126,10 +134,9 @@ export function BeforeAfterSlider({
   const hasAny = hasBefore || hasAfter;
   const canCompare = hasBefore && hasAfter;
 
-  useEffect(() => {
-    if (inspectActiveRef.current) return;
-    onChange?.(pct);
-  }, [pct, onChange]);
+  function notifyChange(nextPct) {
+    onChangeRef.current?.(nextPct);
+  }
 
   useEffect(() => {
     return () => {
@@ -188,7 +195,9 @@ export function BeforeAfterSlider({
   function onTrackPointerUp(e) {
     if (!allowDrag || handleOnlyDrag) return;
     cleanupWindowDragListeners();
+    const wasDragging = draggingRef.current;
     draggingRef.current = false;
+    if (wasDragging) notifyChange(valueRef.current);
     try {
       e.currentTarget.releasePointerCapture?.(e.pointerId);
     } catch {
@@ -279,7 +288,7 @@ export function BeforeAfterSlider({
     }
     if (pointersRef.current.size === 0) {
       panRef.current = null;
-      queueMicrotask(() => onChange?.(valueRef.current));
+      queueMicrotask(() => notifyChange(valueRef.current));
     }
     syncInspectPointers();
     const el = zoomLayerRef.current;
@@ -307,48 +316,75 @@ export function BeforeAfterSlider({
     return () => el.removeEventListener("wheel", onWheel);
   }, [isInspectMode]);
 
-  function remeasureRoot() {
+  function remeasureRoot(force = false) {
     const root = rootRef.current;
     if (!root) return;
-    setRootBox({ w: root.clientWidth, h: root.clientHeight });
+
+    const w = root.clientWidth;
+    const h = root.clientHeight;
+    const prev = rootBoxRef.current;
+
+    if (!force && Math.abs(prev.w - w) < 1 && Math.abs(prev.h - h) < 1) {
+      return;
+    }
+
+    rootBoxRef.current = { w, h };
+
     if (isInspectMode) {
+      setRootBox({ w, h });
       setInspectBoth({ s: 1, x: 0, y: 0 });
     }
-    draggingRef.current = false;
-    cleanupWindowDragListeners();
-    pointersRef.current.clear();
-    pinchRef.current = null;
-    panRef.current = null;
-    setInspectActive(false);
+
+    if (force) {
+      draggingRef.current = false;
+      cleanupWindowDragListeners();
+      pointersRef.current.clear();
+      pinchRef.current = null;
+      panRef.current = null;
+      setInspectActive(false);
+    }
   }
 
-  /** Track root size for screen-fixed divider clip + re-clamp pan on resize. */
+  function scheduleRemeasure(force = false) {
+    if (typeof window === "undefined") return;
+    window.cancelAnimationFrame(remeasureRafRef.current);
+    remeasureRafRef.current = window.requestAnimationFrame(() => {
+      remeasureRoot(force);
+    });
+  }
+
+  /** Track root size for screen-fixed divider clip + re-clamp pan on resize (fullscreen inspect only). */
   useLayoutEffect(() => {
-    remeasureRoot();
+    if (isInspectMode) {
+      scheduleRemeasure(true);
+    }
   }, [layoutResetToken, isInspectMode]);
 
   useEffect(() => {
+    if (!isInspectMode) return;
     const root = rootRef.current;
     if (!root || typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(() => {
-      remeasureRoot();
+      scheduleRemeasure(false);
     });
     ro.observe(root);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      window.cancelAnimationFrame(remeasureRafRef.current);
+    };
   }, [isInspectMode]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!isInspectMode || typeof window === "undefined") return;
     function onViewportChange() {
-      remeasureRoot();
+      scheduleRemeasure(false);
     }
     window.addEventListener("resize", onViewportChange);
     window.visualViewport?.addEventListener("resize", onViewportChange);
-    window.visualViewport?.addEventListener("scroll", onViewportChange);
     return () => {
       window.removeEventListener("resize", onViewportChange);
       window.visualViewport?.removeEventListener("resize", onViewportChange);
-      window.visualViewport?.removeEventListener("scroll", onViewportChange);
+      window.cancelAnimationFrame(remeasureRafRef.current);
     };
   }, [isInspectMode]);
 
@@ -383,6 +419,7 @@ export function BeforeAfterSlider({
       return;
     }
     draggingRef.current = false;
+    notifyChange(valueRef.current);
     try {
       e.currentTarget.releasePointerCapture?.(e.pointerId);
     } catch {
@@ -392,7 +429,9 @@ export function BeforeAfterSlider({
 
   function onDragLostPointerCapture() {
     cleanupWindowDragListeners();
+    const wasDragging = draggingRef.current;
     draggingRef.current = false;
+    if (wasDragging) notifyChange(valueRef.current);
   }
 
   const zoomTransform = {
@@ -507,7 +546,7 @@ export function BeforeAfterSlider({
         ].join(" ")}
         style={{
           ...(aspect === "fill" ? {} : { aspectRatio: aspect }),
-          ...(rootBox.w > 0 ? { "--ba-root-w": `${rootBox.w}px` } : {}),
+          ...(isInspectMode && rootBox.w > 0 ? { "--ba-root-w": `${rootBox.w}px` } : {}),
         }}
         onPointerDown={handleOnlyDrag ? undefined : onTrackPointerDown}
         onPointerMove={handleOnlyDrag ? undefined : onTrackPointerMove}
@@ -558,7 +597,7 @@ export function BeforeAfterSlider({
                 <div
                   className={[
                     "pointer-events-none absolute left-4 z-20 rounded-full border border-white/14 bg-black/35 px-3.5 py-1.5 text-[10px] font-medium tracking-[0.12em] uppercase text-white/80 backdrop-blur-sm shadow-[0_8px_24px_-18px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.1)]",
-                    chromeless ? "top-14" : "top-4",
+                    chromeless ? "top-4" : "top-4",
                   ].join(" ")}
                 >
                   {beforeLabel}
@@ -566,7 +605,7 @@ export function BeforeAfterSlider({
                 <div
                   className={[
                     "pointer-events-none absolute right-4 z-20 rounded-full border border-white/14 bg-black/35 px-3.5 py-1.5 text-[10px] font-medium tracking-[0.12em] uppercase text-white/80 backdrop-blur-sm shadow-[0_8px_24px_-18px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.1)]",
-                    chromeless ? "top-14" : "top-4",
+                    chromeless ? "top-4" : "top-4",
                   ].join(" ")}
                 >
                   {afterLabel}

@@ -97,7 +97,7 @@ export function PremiumBeforeAfter({
   const [closing, setClosing] = useState(false);
   const [fullscreenVisible, setFullscreenVisible] = useState(false);
   const [inlineKey, setInlineKey] = useState(0);
-  const [value, setValue] = useState(Number(initial) || 52);
+  const sliderValueRef = useRef(Number(initial) || 52);
   const closeTimerRef = useRef(0);
 
   const modalActive = open || closing;
@@ -117,7 +117,9 @@ export function PremiumBeforeAfter({
   const hasAny = Boolean(beforeUrl || afterUrl);
   const canCompare = Boolean(beforeUrl && afterUrl);
   const showRotateHint = modalActive && portraitMobileHint && canCompare;
-  const onChange = useCallback((pct) => setValue(pct), []);
+  const onChange = useCallback((pct) => {
+    sliderValueRef.current = pct;
+  }, []);
 
   /** Mobile portrait: fixed 16/9 frame (landscape photos fit naturally). Desktop/tablet: dvh fill. */
   const useMobileAspectFrame = isLandscapeMobile || portraitMobileHint;
@@ -178,7 +180,7 @@ export function PremiumBeforeAfter({
     afterUrl,
     beforeLabel,
     afterLabel,
-    initial: value,
+    initial: sliderValueRef.current,
     onChange,
     chromeless: true,
     handleOnlyDrag: true,

@@ -2,6 +2,8 @@ import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
 
+const MAX_GOOGLE_REVIEWS = 3;
+
 function StarIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor" aria-hidden="true">
@@ -33,6 +35,7 @@ function GoogleLogo() {
 
 export function ReviewsSection({ id, label, title, items, googleMapsUrl }) {
   const mapsUrl = googleMapsUrl || "https://maps.app.goo.gl/EqftrXDWDv6ejHjN8";
+  const displayedReviews = (items ?? []).slice(0, MAX_GOOGLE_REVIEWS);
 
   return (
     <section id={id} className="relative scroll-mt-20 py-16 sm:py-24">
@@ -72,7 +75,7 @@ export function ReviewsSection({ id, label, title, items, googleMapsUrl }) {
 
         {/* Review cards */}
         <Stagger className="grid gap-4 sm:grid-cols-3">
-          {items.map((review) => (
+          {displayedReviews.map((review) => (
             <article
               key={review.name}
               data-stagger

@@ -5,9 +5,10 @@ import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
 
 const GOOGLE_MAPS_URL = "https://maps.app.goo.gl/EqftrXDWDv6ejHjN8";
+const MAX_GOOGLE_REVIEWS = 3;
 
 // Add real reviews here as they come in. text is optional — card renders
-// stars + author even if text is absent.
+// stars + author even if text is absent. Only the first MAX_GOOGLE_REVIEWS are shown.
 const REVIEWS = [
   {
     text: "",
@@ -17,28 +18,15 @@ const REVIEWS = [
   },
 ];
 
-// Manually curated project photos. Each entry shows as a card in the grid.
-// Replace these stock photos with real YardCraft project images when ready.
-// src can be a Supabase URL, /images/... path, or any absolute URL.
-// Leave src as "" to keep that slot as an empty placeholder.
-// Add or remove entries to control exactly how many cards appear.
-const PHOTOS = [
-  {
-    src: "https://images.pexels.com/photos/4135714/pexels-photo-4135714.jpeg?auto=compress&cs=tinysrgb&w=900&h=675&dpr=1",
-    label: "Outdoor patio & fireplace",
-  },
-  {
-    src: "https://images.pexels.com/photos/30725657/pexels-photo-30725657.jpeg?auto=compress&cs=tinysrgb&w=900&h=675&dpr=1",
-    label: "Custom outdoor kitchen",
-  },
-  {
-    src: "https://images.pexels.com/photos/25972319/pexels-photo-25972319.jpeg?auto=compress&cs=tinysrgb&w=900&h=675&dpr=1",
-    label: "Backyard garden retreat",
-  },
+const PROJECT_LABELS = [
+  "Outdoor patio & fireplace",
+  "Custom outdoor kitchen",
+  "Backyard garden retreat",
 ];
 
 export function TrustSection() {
-  const hasReviews = REVIEWS.length > 0;
+  const displayedReviews = REVIEWS.slice(0, MAX_GOOGLE_REVIEWS);
+  const hasReviews = displayedReviews.length > 0;
 
   return (
     <section id="trust" className="scroll-mt-24 py-28 sm:py-36">
@@ -80,19 +68,19 @@ export function TrustSection() {
             {/* Review cards */}
             {hasReviews && (
               <div data-stagger className="grid gap-8 md:grid-cols-2 md:gap-10 lg:grid-cols-3 lg:gap-x-12">
-                {REVIEWS.map((review, i) => (
-                  <ReviewCard key={i} {...review} />
+                {displayedReviews.map((review, i) => (
+                  <ReviewCard key={`${review.author}-${i}`} {...review} />
                 ))}
               </div>
             )}
 
-            {/* Project photo slots — replace src with real project photos */}
+            {/* Project highlights — text only */}
             <div
               data-stagger
-              className={hasReviews ? "mt-14 grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-x-12" : "grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-x-12"}
+              className={hasReviews ? "mt-14 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-x-12" : "grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-x-12"}
             >
-              {PHOTOS.map((photo, i) => (
-                <PhotoSlot key={i} src={photo.src} label={photo.label} />
+              {PROJECT_LABELS.map((label) => (
+                <ProjectLabel key={label} label={label} />
               ))}
             </div>
 
@@ -143,21 +131,10 @@ function ReviewCard({ text, author, location, rating }) {
   );
 }
 
-function PhotoSlot({ label, src }) {
+function ProjectLabel({ label }) {
   return (
-    <div className="space-y-3.5">
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src}
-          alt={label}
-          loading="lazy"
-          className="yc-lux-photo aspect-4/3 w-full rounded-2xl object-cover object-center"
-        />
-      ) : (
-        <div className="aspect-4/3 w-full rounded-2xl border border-white/11 bg-white/[0.035]" />
-      )}
-      <div className="text-[11px] tracking-[0.14em] uppercase text-muted/85">{label}</div>
+    <div className="border-t border-white/9 pt-5 text-[11px] font-medium tracking-[0.14em] uppercase text-muted/85 sm:pt-6">
+      {label}
     </div>
   );
 }
