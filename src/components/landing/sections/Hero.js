@@ -13,7 +13,7 @@ export function Hero({ content }) {
           src="/images/hero-bg.png"
           alt="Premium outdoor landscaping by YardCraft"
           fill
-          className="yc-lux-photo yc-lux-photo-hero object-cover object-[78%_40%] sm:object-center"
+          className="yc-lux-photo yc-lux-photo-hero object-cover object-[88%_40%] sm:object-center"
           priority
         />
         <div className="yc-lux-photo-warmth yc-lux-photo-warmth-hero" aria-hidden="true" />
@@ -25,8 +25,8 @@ export function Hero({ content }) {
         <div className="absolute inset-x-0 bottom-0 h-48 bg-[linear-gradient(to_top,rgba(5,5,6,0.85),transparent)]" />
         {/* Top vignette */}
         <div className="absolute inset-x-0 top-0 h-32 bg-[linear-gradient(to_bottom,rgba(5,5,6,0.45),transparent)]" />
-        {/* Warm amber glow — simulates landscape lighting reflecting on scene */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_68%_62%,rgba(214,160,60,0.08),transparent_60%)]" />
+        {/* Subtle scene glow — kept neutral so hero reads less yellow/orange */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_68%_62%,rgba(180,190,210,0.05),transparent_60%)]" />
       </div>
 
       <Container className="relative z-10 py-24 sm:py-28 lg:py-36">

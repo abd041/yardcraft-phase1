@@ -133,13 +133,13 @@ body {
   opacity: 0.42;
 }
 
-/* Homepage hero — slightly cooler / less saturated than site-wide lux treatment */
+/* Homepage hero — cooler / less saturated than site-wide lux treatment */
 .yc-lux-photo-hero {
-  filter: brightness(1.04) contrast(1.16) saturate(1.26) hue-rotate(-1.5deg);
+  filter: brightness(1.02) contrast(1.14) saturate(1.08) hue-rotate(5deg);
 }
 
 .yc-lux-photo-warmth-hero {
-  opacity: 0.32;
+  opacity: 0.14;
 }
 
 ::selection {
