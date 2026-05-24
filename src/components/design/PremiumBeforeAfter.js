@@ -1,13 +1,53 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { BeforeAfterSlider } from "@/components/design/BeforeAfterSlider";
 
 function cx(...parts) {
   return parts.filter(Boolean).join(" ");
 }
 
-/* ── Portrait mobile: show rotate hint ───────────────────────── */
+const FULLSCREEN_CLOSE_MS = 520;
+
+function useBodyScrollLock(active) {
+  const scrollYRef = useRef(0);
+
+  useEffect(() => {
+    if (!active || typeof window === "undefined") return;
+
+    const html = document.documentElement;
+    const body = document.body;
+    scrollYRef.current = window.scrollY;
+
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollYRef.current}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+
+    return () => {
+      const restoreY = scrollYRef.current;
+      html.style.overflow = "";
+      body.style.overflow = "";
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.width = "";
+
+      requestAnimationFrame(() => {
+        window.scrollTo(0, restoreY);
+        requestAnimationFrame(() => {
+          window.dispatchEvent(new Event("resize"));
+          window.visualViewport?.dispatchEvent(new Event("resize"));
+        });
+      });
+    };
+  }, [active]);
+}
+
 function subscribePortraitMobileHint(onStoreChange) {
   if (typeof window === "undefined") return () => {};
   const mql = window.matchMedia("(orientation: portrait)");
@@ -31,9 +71,6 @@ function getPortraitMobileHintServerSnapshot() {
   return false;
 }
 
-/* ── Landscape mobile: fix ultra-wide crop bug ───────────────── */
-// Matches phones rotated sideways: landscape orientation AND viewport
-// height ≤ 600px (desktop landscape is typically 700px+ tall).
 const LANDSCAPE_MQ = "(orientation: landscape) and (max-height: 600px)";
 
 function subscribeLandscapeMobile(onChange) {
@@ -48,7 +85,6 @@ function getLandscapeMobileSnapshot() {
   return window.matchMedia(LANDSCAPE_MQ).matches;
 }
 
-/* ── Component ───────────────────────────────────────────────── */
 export function PremiumBeforeAfter({
   beforeUrl,
   afterUrl,
@@ -58,8 +94,13 @@ export function PremiumBeforeAfter({
   afterLabel = "After",
 }) {
   const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [fullscreenVisible, setFullscreenVisible] = useState(false);
+  const [inlineKey, setInlineKey] = useState(0);
   const [value, setValue] = useState(Number(initial) || 52);
+  const closeTimerRef = useRef(0);
+
+  const modalActive = open || closing;
 
   const portraitMobileHint = useSyncExternalStore(
     subscribePortraitMobileHint,
@@ -67,16 +108,40 @@ export function PremiumBeforeAfter({
     getPortraitMobileHintServerSnapshot,
   );
 
-  // true when phone is rotated sideways but fullscreen is NOT open
   const isLandscapeMobile = useSyncExternalStore(
     subscribeLandscapeMobile,
     getLandscapeMobileSnapshot,
     () => false,
   );
 
-  const showRotateHint = open && portraitMobileHint;
+  const showRotateHint = modalActive && portraitMobileHint;
   const hasAny = Boolean(beforeUrl || afterUrl);
   const onChange = useCallback((pct) => setValue(pct), []);
+
+  /** Mobile portrait: fixed 16/9 frame (landscape photos fit naturally). Desktop/tablet: dvh fill. */
+  const useMobileAspectFrame = isLandscapeMobile || portraitMobileHint;
+
+  const openFullscreen = useCallback(() => {
+    window.clearTimeout(closeTimerRef.current);
+    setClosing(false);
+    setOpen(true);
+  }, []);
+
+  const closeFullscreen = useCallback(() => {
+    if (!modalActive) return;
+    setFullscreenVisible(false);
+    setClosing(true);
+    window.clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = window.setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+      setInlineKey((k) => k + 1);
+    }, FULLSCREEN_CLOSE_MS);
+  }, [modalActive]);
+
+  useEffect(() => {
+    return () => window.clearTimeout(closeTimerRef.current);
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -92,97 +157,77 @@ export function PremiumBeforeAfter({
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!modalActive) return;
     function onKey(e) {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closeFullscreen();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [modalActive, closeFullscreen]);
 
-  /** Lock page scroll while fullscreen is open — prevents horizontal drift after pinch. */
-  useEffect(() => {
-    if (!open) return;
-    const scrollY = window.scrollY;
-    const { style } = document.body;
-    const prev = {
-      position: style.position,
-      top: style.top,
-      left: style.left,
-      right: style.right,
-      overflow: style.overflow,
-      width: style.width,
-    };
-    style.position = "fixed";
-    style.top = `-${scrollY}px`;
-    style.left = "0";
-    style.right = "0";
-    style.width = "100%";
-    style.overflow = "hidden";
-    return () => {
-      style.position = prev.position;
-      style.top = prev.top;
-      style.left = prev.left;
-      style.right = prev.right;
-      style.overflow = prev.overflow;
-      style.width = prev.width;
-      window.scrollTo(0, scrollY);
-    };
-  }, [open]);
+  useBodyScrollLock(modalActive);
 
-  // In landscape mobile (no fullscreen), drop the dvh height constraint
-  // from the parent and let the slider set its own height via aspect ratio.
-  // This prevents the 5:1 ultra-wide cinematic crop that dvh causes in landscape.
   const outerClass = cx(
     "touch-pan-y-safe relative w-full",
-    isLandscapeMobile ? undefined : className,
+    useMobileAspectFrame ? undefined : className,
   );
+
+  const sharedSliderProps = {
+    beforeUrl,
+    afterUrl,
+    beforeLabel,
+    afterLabel,
+    initial: value,
+    onChange,
+    chromeless: true,
+    handleOnlyDrag: true,
+    eagerImages: true,
+    layoutResetToken: inlineKey,
+    imageObjectClass: portraitMobileHint ? "object-[center_42%]" : "object-center",
+  };
+
+  function renderInlineSlider(aspect) {
+    if (modalActive) {
+      if (aspect === "fill") {
+        return <div className="h-full w-full bg-black" aria-hidden="true" />;
+      }
+      return <div className="aspect-video w-full bg-black" aria-hidden="true" />;
+    }
+    return (
+      <BeforeAfterSlider
+        key={`inline-${inlineKey}`}
+        {...sharedSliderProps}
+        aspect={aspect}
+        className={aspect === "fill" ? "h-full min-h-0 w-full bg-black" : "w-full"}
+      />
+    );
+  }
 
   return (
     <>
       <div className={outerClass}>
-        {isLandscapeMobile ? (
-          /* ── Landscape mobile: natural 16/9 ratio ── */
-          <div className="relative w-full overflow-hidden">
-            <BeforeAfterSlider
-              beforeUrl={beforeUrl}
-              afterUrl={afterUrl}
-              beforeLabel={beforeLabel}
-              afterLabel={afterLabel}
-              initial={open ? null : value}
-              aspect="16/9"
-              onChange={open ? undefined : onChange}
-              chromeless
-              handleOnlyDrag
-              eagerImages
-              className="w-full"
-            />
-            {hasAny ? <FullscreenButton onClick={() => setOpen(true)} /> : null}
-            <RotateHint visible={!open && portraitMobileHint} />
+        {useMobileAspectFrame ? (
+          <div className="relative w-full overflow-hidden rounded-b-2xl shadow-[inset_0_-1px_0_rgba(255,255,255,0.1)]">
+            {renderInlineSlider("16/9")}
+            {portraitMobileHint ? (
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-8 bg-linear-to-t from-black/45 to-transparent"
+                aria-hidden="true"
+              />
+            ) : null}
+            {hasAny && !modalActive ? <FullscreenButton onClick={openFullscreen} /> : null}
+            <RotateHint visible={!modalActive && portraitMobileHint} />
           </div>
         ) : (
-          /* ── Portrait / desktop: fill the dvh container ── */
           <div className="relative h-full min-h-0 w-full overflow-hidden">
-            <BeforeAfterSlider
-              beforeUrl={beforeUrl}
-              afterUrl={afterUrl}
-              beforeLabel={beforeLabel}
-              afterLabel={afterLabel}
-              initial={open ? null : value}
-              aspect="fill"
-              onChange={open ? undefined : onChange}
-              chromeless
-              handleOnlyDrag
-              eagerImages
-              className="h-full min-h-0 w-full bg-black/0"
-            />
-            {hasAny ? <FullscreenButton onClick={() => setOpen(true)} /> : null}
-            <RotateHint visible={!open && portraitMobileHint} />
+            {renderInlineSlider("fill")}
+            {hasAny && !modalActive ? <FullscreenButton onClick={openFullscreen} /> : null}
+            <RotateHint visible={!modalActive && portraitMobileHint} />
           </div>
         )}
       </div>
 
-      {open ? (
+      {modalActive ? (
         <div
           className={cx(
             "fixed inset-0 z-100 touch-none overflow-hidden overscroll-none bg-black/91 backdrop-blur-sm transition-opacity duration-500 ease-in-out",
@@ -192,7 +237,7 @@ export function PremiumBeforeAfter({
           aria-modal="true"
           aria-label="Fullscreen before and after comparison"
         >
-          <div className="absolute inset-0 z-0" onClick={() => setOpen(false)} />
+          <div className="absolute inset-0 z-0" onClick={closeFullscreen} />
           <div
             className={cx(
               "absolute inset-0 z-10 overflow-hidden transition duration-500 ease-in-out",
@@ -201,15 +246,9 @@ export function PremiumBeforeAfter({
           >
             <div className="relative h-full w-full">
               <BeforeAfterSlider
-                beforeUrl={beforeUrl}
-                afterUrl={afterUrl}
-                beforeLabel={beforeLabel}
-                afterLabel={afterLabel}
-                initial={value}
+                key="fullscreen"
+                {...sharedSliderProps}
                 aspect="fill"
-                onChange={onChange}
-                chromeless
-                handleOnlyDrag
                 allowPinchZoom
                 className="h-full w-full"
               />
@@ -219,7 +258,7 @@ export function PremiumBeforeAfter({
 
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={closeFullscreen}
             className="absolute right-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white backdrop-blur transition hover:bg-black/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
             aria-label="Close fullscreen comparison"
           >
@@ -231,7 +270,6 @@ export function PremiumBeforeAfter({
   );
 }
 
-/* ── Sub-components ──────────────────────────────────────────── */
 function FullscreenButton({ onClick }) {
   return (
     <button

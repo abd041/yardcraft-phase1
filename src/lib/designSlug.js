@@ -21,11 +21,13 @@ export function isValidDesignSlug(slug) {
   return NUMERIC_SLUG_RE.test(s);
 }
 
-/** Lowercase canonical slug, or null if not a valid numeric design id */
+/** Lowercase canonical slug without zero-padding: design9, design28 */
 export function canonicalDesignSlug(slug) {
   const s = typeof slug === "string" ? slug.trim().toLowerCase() : "";
   if (!NUMERIC_SLUG_RE.test(s)) return null;
-  return s;
+  const n = Number.parseInt(s.slice(DESIGN_SLUG_PREFIX.length), 10);
+  if (!Number.isFinite(n) || n < 1) return null;
+  return `${DESIGN_SLUG_PREFIX}${n}`;
 }
 
 /** Accepts design28 or bare number "28" for URLs / search */
@@ -36,18 +38,7 @@ export function resolveDesignSlug(input) {
   return canonicalDesignSlug(s);
 }
 
-function trailingDigitWidth(slugs) {
-  let maxLen = 0;
-  for (const slug of slugs) {
-    const c = canonicalDesignSlug(slug);
-    if (!c) continue;
-    const tail = c.slice(DESIGN_SLUG_PREFIX.length);
-    maxLen = Math.max(maxLen, tail.length);
-  }
-  return maxLen;
-}
-
-/** Next sequential slug (e.g. design27 → design28) */
+/** Next sequential slug (e.g. design27 → design28) — always unpadded */
 export function getNextDesignSlug(designs) {
   const slugs = (Array.isArray(designs) ? designs : [])
     .map((d) => (typeof d === "string" ? d : d?.slug))
@@ -59,20 +50,37 @@ export function getNextDesignSlug(designs) {
     if (n != null && n > maxNum) maxNum = n;
   }
 
-  const existing = new Set(
-    slugs.map((s) => canonicalDesignSlug(s)).filter(Boolean),
-  );
-  const pad = trailingDigitWidth(slugs);
-
-  for (let attempt = 0; attempt < 500; attempt += 1) {
-    const nextNum = maxNum + 1 + attempt;
-    const numStr =
-      pad > 1 ? String(nextNum).padStart(pad, "0") : String(nextNum);
-    const candidate = `${DESIGN_SLUG_PREFIX}${numStr}`;
-    if (!existing.has(candidate)) return candidate;
-  }
-
   return `${DESIGN_SLUG_PREFIX}${maxNum + 1}`;
+}
+
+function designScore(d) {
+  return (d?.before_image ? 1 : 0) + (d?.after_image ? 1 : 0);
+}
+
+function designTimestamp(d) {
+  const raw = d?.updated_at || d?.created_at;
+  if (!raw) return 0;
+  const ms = new Date(raw).getTime();
+  return Number.isNaN(ms) ? 0 : ms;
+}
+
+function pickPreferredDesign(a, b) {
+  const sa = designScore(a);
+  const sb = designScore(b);
+  if (sa !== sb) return sa > sb ? a : b;
+  return designTimestamp(a) >= designTimestamp(b) ? a : b;
+}
+
+/** Collapse legacy padded slugs (design009) to one row per property number. */
+export function dedupeDesignsByNumber(designs) {
+  const byNum = new Map();
+  for (const d of designs) {
+    const num = getDesignNumber(d?.slug);
+    if (num == null) continue;
+    const existing = byNum.get(num);
+    byNum.set(num, existing ? pickPreferredDesign(existing, d) : d);
+  }
+  return Array.from(byNum.values());
 }
 
 export function assertValidDesignSlug(slug) {

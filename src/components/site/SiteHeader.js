@@ -43,10 +43,10 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Phone in nav — mobile landscape only; portrait uses quote button only */}
+          {/* Phone in nav — all mobile; tablet+ uses text link + CTAs */}
           <a
             href={`tel:${BRAND.phoneTel}`}
-            className="hidden max-w-[calc(100vw-8rem)] items-center gap-1.5 whitespace-nowrap rounded-full border border-white/30 px-3 py-2 text-[11px] font-semibold tracking-[0.03em] text-foreground transition hover:border-white/50 hover:bg-white/8 max-sm:landscape:inline-flex sm:hidden"
+            className="inline-flex max-w-[calc(100vw-8rem)] items-center gap-1.5 whitespace-nowrap rounded-full border border-white/30 px-3 py-2 text-[11px] font-semibold tracking-[0.03em] text-foreground transition hover:border-white/50 hover:bg-white/8 sm:hidden"
           >
             <PhoneIcon />
             {BRAND.phoneDisplay}
@@ -69,7 +69,7 @@ export function SiteHeader() {
 
           <Button
             href="#quote"
-            className="inline-flex max-w-[8.25rem] shrink whitespace-normal px-3 py-2 text-center text-[10px] leading-[1.25] sm:max-w-none sm:whitespace-nowrap sm:px-4 sm:text-[12px] sm:leading-normal"
+            className="hidden shrink whitespace-nowrap px-4 py-2 text-center text-[12px] leading-normal sm:inline-flex"
           >
             Request Your Custom Plan
           </Button>

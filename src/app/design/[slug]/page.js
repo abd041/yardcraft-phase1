@@ -8,7 +8,6 @@ import { ServicesSection } from "@/components/design/sections/ServicesSection";
 import { TrustSection } from "@/components/design/sections/TrustSection";
 import { isAdminRequest } from "@/lib/adminOptional";
 import { AdminQuickEditFab } from "@/components/design/AdminQuickEditFab";
-import { formatDesignNumber } from "@/lib/designSlug";
 import { getSiteUrl } from "@/lib/site";
 import { PremiumBeforeAfter } from "@/components/design/PremiumBeforeAfter";
 import { BRAND } from "@/lib/brand";
@@ -25,7 +24,7 @@ export async function generateMetadata({ params }) {
   const design = await getDesignBySlug(slug);
   if (!design) return { title: "Design not found" };
   return {
-    title: `YardCraft • ${formatDesignNumber(design.slug)}`,
+    title: "YardCraft • Property Preview",
     description: `${BRAND.tagline}. Luxury outdoor living preview with before/after comparison and a fast estimate.`,
   };
 }
@@ -69,13 +68,13 @@ export default async function Page({ params }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_42%,rgba(0,0,0,0.4)_100%)]" />
       </div>
 
-      <DesignQrHeader propertyNumber={formatDesignNumber(slug)} />
+      <DesignQrHeader />
 
-      <section className="touch-pan-y-safe relative z-20 -mt-1 pt-0 lg:-mt-3">
+      <section className="touch-pan-y-safe relative z-20 -mt-2 pt-0 max-md:-mt-3 md:-mt-1 lg:-mt-3">
         <PremiumBeforeAfter
           beforeUrl={beforeSrc}
           afterUrl={afterSrc}
-          className="relative z-20 h-[80dvh] min-h-[72dvh] w-full max-w-full overflow-hidden lg:h-[85vh] lg:min-h-[80vh]"
+          className="relative z-20 w-full max-w-full overflow-hidden md:h-[78dvh] md:min-h-[70dvh] lg:h-[85vh] lg:min-h-[80vh]"
         />
 
         {/* Tailored Property Preview — subtle eyebrow below the comparison */}

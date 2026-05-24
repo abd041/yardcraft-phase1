@@ -1,12 +1,15 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/Button";
 import { ToastHost } from "@/components/ui/ToastHost";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
+import { validateBrowserFile } from "@/lib/uploadImage";
+import { previewUrlWithCacheBust } from "@/lib/adminUploadClient";
+import { dedupeDesignsByNumber } from "@/lib/designSlug";
 import {
   formatDesignNumber,
   getDesignNumber,
@@ -153,11 +156,14 @@ export function AdminDesignsClient({ initialDesigns }) {
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }
-  const [designs, setDesigns] = useState(Array.isArray(initialDesigns) ? initialDesigns : []);
+  const [designs, setDesigns] = useState(() =>
+    dedupeDesignsByNumber(Array.isArray(initialDesigns) ? initialDesigns : []),
+  );
   const [busy, setBusy] = useState(null);
   const [error, setError] = useState("");
   const [toasts, setToasts] = useState([]);
-  const [progress, setProgress] = useState(null);
+  const [progressByKey, setProgressByKey] = useState({});
+  const [previewVersion, setPreviewVersion] = useState({});
   const [filter, setFilter] = useState("all"); // all | ready | draft | needs
   const [sort, setSort] = useState("slug"); // slug | recent | completion
   const [createdFrom, setCreatedFrom] = useState("");
@@ -166,6 +172,33 @@ export function AdminDesignsClient({ initialDesigns }) {
   const [designNumMax, setDesignNumMax] = useState("");
 
   const toastIdRef = useRef(0);
+  const activeUploadRef = useRef(null);
+  const uploadAbortRef = useRef(null);
+
+  function mergeDesignRecord(prev, next) {
+    if (!next?.slug) return prev;
+    const idx = prev.findIndex((d) => d.slug === next.slug);
+    let merged;
+    if (idx === -1) {
+      merged = [next, ...prev];
+    } else {
+      merged = prev.slice();
+      merged[idx] = next;
+    }
+    return dedupeDesignsByNumber(merged);
+  }
+
+  useEffect(() => {
+    return () => uploadAbortRef.current?.abort();
+  }, []);
+
+  useEffect(() => {
+    const canonical = resolveDesignSlug(selectedSlug);
+    if (canonical && selectedSlug && canonical !== selectedSlug) {
+      selectSlug(canonical);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- normalize legacy padded slugs once
+  }, [selectedSlug]);
 
   function pushToast(toast) {
     const id = `${Date.now()}-${toastIdRef.current++}`;
@@ -211,37 +244,26 @@ export function AdminDesignsClient({ initialDesigns }) {
   const selected = useMemo(() => {
     const slug = resolveDesignSlug(selectedSlug);
     if (!slug) return null;
-    return designs.find((d) => d.slug === slug) ?? null;
+    return designs.find((d) => resolveDesignSlug(d.slug) === slug) ?? null;
   }, [designs, selectedSlug]);
 
   const selectedStatus = useMemo(() => computeStatus(selected), [selected]);
   const publicUrl = useMemo(() => (selected?.slug ? `/design/${selected.slug}` : ""), [selected]);
 
-  function xhrUpload(form, onProgress) {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "/api/admin/designs/upload");
+  const activeUploadKey = selected?.slug
+    ? [`before:${resolveDesignSlug(selected.slug)}`, `after:${resolveDesignSlug(selected.slug)}`].find(
+        (key) => progressByKey[key] != null,
+      )
+    : null;
+  const activeUploadProgress = activeUploadKey ? progressByKey[activeUploadKey] : null;
+  const activeUploadLabel = activeUploadKey?.startsWith("before:") ? "Before" : "After";
 
-      xhr.upload.onprogress = (evt) => {
-        if (!evt.lengthComputable) return;
-        onProgress?.(Math.round((evt.loaded / evt.total) * 100));
-      };
-
-      xhr.onload = () => {
-        try {
-          const json = JSON.parse(xhr.responseText || "{}");
-          if (xhr.status >= 200 && xhr.status < 300 && json?.ok) {
-            resolve(json);
-          } else {
-            reject(new Error(json?.message || json?.error || "Upload failed"));
-          }
-        } catch {
-          reject(new Error("Upload failed"));
-        }
-      };
-
-      xhr.onerror = () => reject(new Error("Network error"));
-      xhr.send(form);
+  function clearUploadProgress(key) {
+    setProgressByKey((prev) => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
     });
   }
 
@@ -259,40 +281,62 @@ export function AdminDesignsClient({ initialDesigns }) {
       return;
     }
 
-    const form = new FormData();
-    form.set("slug", slug);
-    form.set("kind", kind);
-    form.set("file", file);
+    const uploadKey = `${kind}:${slug}`;
+    if (activeUploadRef.current === uploadKey) {
+      pushToast({ type: "error", title: "Upload in progress", message: "Please wait for the current upload." });
+      return;
+    }
 
-    setBusy(`${kind}:${slug}`);
-    setProgress(0);
+    uploadAbortRef.current?.abort();
+    const controller = new AbortController();
+    uploadAbortRef.current = controller;
+    activeUploadRef.current = uploadKey;
+
+    setBusy(uploadKey);
+    setProgressByKey((prev) => ({ ...prev, [uploadKey]: 0 }));
+
     try {
-      const json = await xhrUpload(form, (pct) => setProgress(pct));
+      const json = await uploadDesignImage({
+        slug,
+        kind,
+        file,
+        signal: controller.signal,
+        onProgress: (pct) => {
+          setProgressByKey((prev) => ({ ...prev, [uploadKey]: pct }));
+        },
+      });
 
       const next = json.design;
-      setDesigns((prev) => {
-        const idx = prev.findIndex((d) => d.slug === next.slug);
-        if (idx === -1) return [next, ...prev];
-        const copy = prev.slice();
-        copy[idx] = next;
-        return copy;
-      });
+      setDesigns((prev) => mergeDesignRecord(prev, next));
+      setPreviewVersion((prev) => ({
+        ...prev,
+        [`${kind}:${next.slug}`]: Date.now(),
+      }));
+
+      if (next.slug && resolveDesignSlug(next.slug) !== slug) {
+        selectSlug(next.slug);
+      } else if (next.slug && selectedSlug !== next.slug) {
+        selectSlug(next.slug);
+      }
 
       pushToast({
         type: "success",
         title: `${kind === "before" ? "Before" : "After"} image saved`,
-        message: formatDesignNumber(slug),
+        message: formatDesignNumber(next.slug || slug),
       });
     } catch (e) {
-      setError(e?.message || "Upload failed");
+      if (controller.signal.aborted) return;
+      const message = e?.message || "Upload failed";
+      setError(message);
       pushToast({
         type: "error",
         title: "Upload failed",
-        message: e?.message || "Try again",
+        message,
       });
     } finally {
+      if (activeUploadRef.current === uploadKey) activeUploadRef.current = null;
       setBusy(null);
-      setProgress(null);
+      clearUploadProgress(uploadKey);
     }
   }
 
@@ -309,11 +353,7 @@ export function AdminDesignsClient({ initialDesigns }) {
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json?.ok) throw new Error(json?.message || "Failed to create slug");
       const next = json.design;
-      setDesigns((prev) => {
-        const exists = prev.some((d) => d.slug === next.slug);
-        if (exists) return prev;
-        return [next, ...prev];
-      });
+      setDesigns((prev) => mergeDesignRecord(prev, next));
       selectSlug(next.slug);
       pushToast({
         type: "success",
@@ -343,7 +383,11 @@ export function AdminDesignsClient({ initialDesigns }) {
       if (!res.ok || !json?.ok) throw new Error(json?.message || "Failed to remove image");
 
       const next = json.design;
-      setDesigns((prev) => prev.map((d) => (d.slug === next.slug ? next : d)));
+      setDesigns((prev) => mergeDesignRecord(prev, next));
+      setPreviewVersion((prev) => ({
+        ...prev,
+        [`${kind}:${next.slug}`]: Date.now(),
+      }));
       pushToast({ type: "success", title: "Image removed", message: formatDesignNumber(slug) });
     } catch (e) {
       pushToast({ type: "error", title: "Remove failed", message: e?.message || "Try again" });
@@ -352,6 +396,11 @@ export function AdminDesignsClient({ initialDesigns }) {
       setBusy(null);
     }
   }
+
+  const selectedCanonicalSlug = useMemo(
+    () => resolveDesignSlug(selected?.slug || selectedSlug) || "",
+    [selected?.slug, selectedSlug],
+  );
 
   return (
     <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
@@ -498,7 +547,7 @@ export function AdminDesignsClient({ initialDesigns }) {
         <div className="lux-scrollbar mt-4 max-h-[560px] overflow-auto pr-1">
           <Stagger className="flex flex-col gap-2" selector="[data-stagger]" stagger={0.04} y={10}>
             {filtered.map((d) => {
-              const active = d.slug === selectedSlug;
+              const active = resolveDesignSlug(d.slug) === resolveDesignSlug(selectedSlug);
               const st = computeStatus(d);
               const updatedAt = d.updated_at || d.created_at || null;
               const thumb = d.after_image || d.before_image || "";
@@ -650,13 +699,14 @@ export function AdminDesignsClient({ initialDesigns }) {
             ) : null}
           </div>
 
-          {progress != null ? (
+          {activeUploadProgress != null ? (
             <Reveal className="rounded-2xl border border-card-border bg-card px-4 py-3 text-xs text-muted">
-              Uploading… <span className="text-foreground">{progress}%</span>
+              Uploading {activeUploadLabel}…{" "}
+              <span className="text-foreground">{activeUploadProgress}%</span>
               <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/10">
                 <div
-                  className="h-full rounded-full bg-[color-mix(in_oklab,var(--green)_75%,var(--gold))]"
-                  style={{ width: `${progress}%` }}
+                  className="h-full rounded-full bg-[color-mix(in_oklab,var(--green)_75%,var(--gold))] transition-[width] duration-200"
+                  style={{ width: `${activeUploadProgress}%` }}
                 />
               </div>
             </Reveal>
@@ -673,25 +723,43 @@ export function AdminDesignsClient({ initialDesigns }) {
               title="Before"
               kind="before"
               url={selected?.before_image || ""}
+              previewVersion={previewVersion[`before:${selectedCanonicalSlug}`] || 0}
+              uploadProgress={progressByKey[`before:${selectedCanonicalSlug}`]}
               disabled={!selected?.slug}
-              busy={busy === `before:${selected?.slug}` || busy === `clear:before:${selected?.slug}`}
+              busy={
+                busy === `before:${selectedCanonicalSlug}` ||
+                busy === `clear:before:${selectedCanonicalSlug}`
+              }
               updatedAt={selected?.updated_at || selected?.created_at || null}
               updatedBy={selected?.updated_by || null}
-              guidance="Recommended: 1600×1000+ • JPG/PNG • Keep driveway + front elevation visible"
+              guidance="Recommended: 1600×1000+ • JPG/PNG/WebP • Max 20 MB"
               onUpload={(file) => upload("before", file)}
               onClear={() => clearImage("before")}
+              onValidationError={(message) => {
+                setError(message);
+                pushToast({ type: "error", title: "Invalid image", message });
+              }}
             />
             <AssetCard
               title="After"
               kind="after"
               url={selected?.after_image || ""}
+              previewVersion={previewVersion[`after:${selectedCanonicalSlug}`] || 0}
+              uploadProgress={progressByKey[`after:${selectedCanonicalSlug}`]}
               disabled={!selected?.slug}
-              busy={busy === `after:${selected?.slug}` || busy === `clear:after:${selected?.slug}`}
+              busy={
+                busy === `after:${selectedCanonicalSlug}` ||
+                busy === `clear:after:${selectedCanonicalSlug}`
+              }
               updatedAt={selected?.updated_at || selected?.created_at || null}
               updatedBy={selected?.updated_by || null}
-              guidance="Recommended: 1600×1000+ • JPG/PNG • Use the transformation render"
+              guidance="Recommended: 1600×1000+ • JPG/PNG/WebP • Max 20 MB"
               onUpload={(file) => upload("after", file)}
               onClear={() => clearImage("after")}
+              onValidationError={(message) => {
+                setError(message);
+                pushToast({ type: "error", title: "Invalid image", message });
+              }}
             />
           </div>
 
@@ -729,6 +797,8 @@ function AssetCard({
   title,
   kind,
   url,
+  previewVersion = 0,
+  uploadProgress,
   disabled,
   busy,
   updatedAt,
@@ -736,15 +806,43 @@ function AssetCard({
   guidance,
   onUpload,
   onClear,
+  onValidationError,
 }) {
   const [file, setFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
+  const [uploadTick, setUploadTick] = useState(0);
+  const inputRef = useRef(null);
+
+  const displayUrl = url ? previewUrlWithCacheBust(url, previewVersion || uploadTick) : "";
+
+  function pickFile(nextFile) {
+    if (!nextFile) return;
+    const validation = validateBrowserFile(nextFile);
+    if (!validation.ok) {
+      onValidationError?.(validation.message);
+      setFile(null);
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+    setFile(nextFile);
+  }
 
   function onDrop(e) {
     e.preventDefault();
     setDragOver(false);
-    const f = e.dataTransfer?.files?.[0] || null;
-    if (f) setFile(f);
+    pickFile(e.dataTransfer?.files?.[0] || null);
+  }
+
+  async function handleUploadClick() {
+    if (!file) return;
+    try {
+      await onUpload(file);
+      setFile(null);
+      setUploadTick(Date.now());
+      if (inputRef.current) inputRef.current.value = "";
+    } catch {
+      // Parent handles errors/toasts.
+    }
   }
 
   return (
@@ -786,15 +884,15 @@ function AssetCard({
             dragOver ? "bg-white/5 border-[color-mix(in_oklab,var(--green)_35%,var(--card-border))]" : "",
           )}
         >
-          {url ? (
+          {displayUrl ? (
             <a
-              href={url}
+              href={displayUrl}
               target="_blank"
               rel="noreferrer"
               className="block"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt="" className="h-44 w-full object-cover" />
+              <img src={displayUrl} alt="" className="h-44 w-full object-cover" />
             </a>
           ) : (
             <div className="flex h-44 items-center justify-center px-6 text-center text-xs text-muted">
@@ -815,19 +913,32 @@ function AssetCard({
 
       <div className="relative mt-4 flex flex-col gap-3">
         <input
+          ref={inputRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/gif"
           disabled={disabled || busy}
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
+          onChange={(e) => pickFile(e.target.files?.[0] || null)}
           className="block w-full text-sm text-muted file:mr-4 file:rounded-full file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-white/15"
         />
+
+        {uploadProgress != null ? (
+          <div className="text-[11px] text-muted">
+            Uploading… <span className="text-foreground">{uploadProgress}%</span>
+          </div>
+        ) : null}
+
+        {file ? (
+          <div className="rounded-2xl border border-card-border bg-black/10 px-3 py-2 text-[11px] text-muted">
+            Selected: <span className="text-foreground">{file.name}</span>
+          </div>
+        ) : null}
 
         <div className="grid gap-2 sm:grid-cols-2">
           <Button
             type="button"
             variant="secondary"
             disabled={disabled || busy || !file}
-            onClick={() => onUpload(file)}
+            onClick={handleUploadClick}
             className="w-full justify-center"
           >
             {busy ? "Working…" : url ? "Replace image" : "Upload image"}

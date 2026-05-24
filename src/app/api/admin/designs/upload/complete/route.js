@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 
 import { isSupabaseConfigured } from "@/lib/supabaseAdmin";
 import {
+  finalizeDesignUpload,
   parseUploadKind,
   parseUploadSlug,
-  uploadDesignFileBuffer,
 } from "@/lib/adminUpload";
 import { requireAdminApi } from "@/lib/authApi";
 import { getDesignBySlug } from "@/lib/designs";
@@ -12,7 +12,6 @@ import { getDesignBySlug } from "@/lib/designs";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-/** Legacy multipart fallback — prefer init + direct-to-storage + complete from the admin UI. */
 export async function POST(request) {
   const gate = await requireAdminApi();
   if (!gate.ok) return gate.response;
@@ -24,18 +23,16 @@ export async function POST(request) {
     );
   }
 
-  const contentType = request.headers.get("content-type") || "";
-  if (!contentType.includes("multipart/form-data")) {
-    return NextResponse.json(
-      { ok: false, error: "expected_multipart_form_data" },
-      { status: 415 },
-    );
+  let body = null;
+  try {
+    body = await request.json();
+  } catch {
+    body = null;
   }
 
-  const form = await request.formData();
-  const slug = parseUploadSlug(form.get("slug"));
-  const kind = parseUploadKind(form.get("kind"));
-  const file = form.get("file");
+  const slug = parseUploadSlug(body?.slug);
+  const kind = parseUploadKind(body?.kind);
+  const path = typeof body?.path === "string" ? body.path.trim() : "";
 
   if (!slug) {
     return NextResponse.json(
@@ -46,23 +43,19 @@ export async function POST(request) {
   if (!kind) {
     return NextResponse.json({ ok: false, error: "invalid_kind" }, { status: 400 });
   }
-  if (!file || typeof file === "string") {
-    return NextResponse.json({ ok: false, error: "missing_file" }, { status: 400 });
+  if (!path) {
+    return NextResponse.json({ ok: false, error: "missing_path" }, { status: 400 });
   }
 
   try {
-    const bytes = new Uint8Array(await file.arrayBuffer());
     const existing = await getDesignBySlug(slug);
     const previousUrl =
       kind === "before" ? existing?.before_image || "" : existing?.after_image || "";
 
-    const result = await uploadDesignFileBuffer({
+    const result = await finalizeDesignUpload({
       slug,
       kind,
-      fileName: file.name || "upload.jpg",
-      fileSize: file.size,
-      contentType: file.type || "",
-      bytes,
+      path,
       userId: gate.user?.id,
       previousUrl,
     });

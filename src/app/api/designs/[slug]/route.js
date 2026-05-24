@@ -23,7 +23,7 @@ export async function PATCH(request, { params }) {
   }
 
   try {
-    const design = await updateDesignBySlug(params.slug, body);
+    const design = await updateDesignBySlug(params.slug, body, { userId: gate.user?.id });
     if (!design) {
       return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
     }

@@ -6,6 +6,10 @@ function clamp(n, min, max) {
   return Math.min(max, Math.max(min, n));
 }
 
+function cx(...parts) {
+  return parts.filter(Boolean).join(" ");
+}
+
 function dist2(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
@@ -48,6 +52,10 @@ export function BeforeAfterSlider({
   allowPinchZoom = false,
   /** Hero / above-the-fold: load images immediately (fixes blank hero on slow mobile networks). */
   eagerImages = false,
+  /** Bumped by parent after fullscreen exit to force a clean remeasure. */
+  layoutResetToken = 0,
+  /** Tailwind object-position class for uploaded images (e.g. object-[center_40%]). */
+  imageObjectClass = "object-center",
 }) {
   const [value, setValue] = useState(clamp(Number(initial) || 50, 0, 100));
   const rootRef = useRef(null);
@@ -298,17 +306,49 @@ export function BeforeAfterSlider({
     return () => el.removeEventListener("wheel", onWheel);
   }, [isInspectMode]);
 
+  function remeasureRoot() {
+    const root = rootRef.current;
+    if (!root) return;
+    setRootBox({ w: root.clientWidth, h: root.clientHeight });
+    if (isInspectMode) {
+      setInspectBoth({ s: 1, x: 0, y: 0 });
+    }
+    draggingRef.current = false;
+    cleanupWindowDragListeners();
+    pointersRef.current.clear();
+    pinchRef.current = null;
+    panRef.current = null;
+    setInspectActive(false);
+  }
+
   /** Track root size for screen-fixed divider clip + re-clamp pan on resize. */
+  useLayoutEffect(() => {
+    remeasureRoot();
+  }, [layoutResetToken, isInspectMode]);
+
   useEffect(() => {
     const root = rootRef.current;
     if (!root || typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(() => {
-      setRootBox({ w: root.clientWidth, h: root.clientHeight });
-      if (isInspectMode) setInspectBoth(inspectRef.current);
+      remeasureRoot();
     });
     ro.observe(root);
-    setRootBox({ w: root.clientWidth, h: root.clientHeight });
     return () => ro.disconnect();
+  }, [isInspectMode]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    function onViewportChange() {
+      remeasureRoot();
+    }
+    window.addEventListener("resize", onViewportChange);
+    window.visualViewport?.addEventListener("resize", onViewportChange);
+    window.visualViewport?.addEventListener("scroll", onViewportChange);
+    return () => {
+      window.removeEventListener("resize", onViewportChange);
+      window.visualViewport?.removeEventListener("resize", onViewportChange);
+      window.visualViewport?.removeEventListener("scroll", onViewportChange);
+    };
   }, [isInspectMode]);
 
   const trackTouchClass = isInspectMode ? "touch-none" : "touch-pan-y-safe";
@@ -368,7 +408,10 @@ export function BeforeAfterSlider({
       decoding="async"
       loading={eagerImages ? "eager" : "lazy"}
       fetchPriority={eagerImages ? "high" : undefined}
-      className="yc-lux-photo pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center [transform:translateZ(0)]"
+      className={cx(
+        "yc-uploaded-photo pointer-events-none absolute inset-0 h-full w-full select-none object-cover",
+        imageObjectClass,
+      )}
     />
   );
 
@@ -381,7 +424,10 @@ export function BeforeAfterSlider({
       decoding="async"
       loading={eagerImages ? "eager" : "lazy"}
       fetchPriority={eagerImages ? "high" : undefined}
-      className="yc-lux-photo pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center [transform:translateZ(0)]"
+      className={cx(
+        "yc-uploaded-photo pointer-events-none absolute inset-0 h-full w-full select-none object-cover",
+        imageObjectClass,
+      )}
     />
   ) : null;
 
