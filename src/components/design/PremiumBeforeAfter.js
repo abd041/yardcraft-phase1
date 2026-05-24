@@ -210,7 +210,7 @@ export function PremiumBeforeAfter({
         {useMobileAspectFrame ? (
           <div className="relative w-full overflow-hidden rounded-b-2xl shadow-[inset_0_-1px_0_rgba(255,255,255,0.1)]">
             {renderInlineSlider("16/9")}
-            {portraitMobileHint ? (
+            {portraitMobileHint && !canCompare ? (
               <div
                 className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-8 bg-linear-to-t from-black/45 to-transparent"
                 aria-hidden="true"
@@ -253,7 +253,7 @@ export function PremiumBeforeAfter({
                 allowPinchZoom
                 className="h-full w-full"
               />
-              <RotateHint visible={showRotateHint} />
+              <RotateHint visible={showRotateHint} fullscreen />
             </div>
           </div>
 
@@ -276,7 +276,7 @@ function FullscreenButton({ onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="absolute bottom-4 right-4 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/35 bg-black/60 text-white shadow-[0_10px_36px_-14px_rgba(0,0,0,0.88),0_0_0_1px_rgba(255,255,255,0.12)_inset] backdrop-blur-sm transition hover:border-white/48 hover:bg-black/72 sm:bottom-5 sm:right-5 sm:h-14 sm:w-14 lg:bottom-6 lg:right-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+      className="absolute right-4 bottom-4 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/35 bg-black/60 text-white shadow-[0_10px_36px_-14px_rgba(0,0,0,0.88),0_0_0_1px_rgba(255,255,255,0.12)_inset] backdrop-blur-sm transition hover:border-white/48 hover:bg-black/72 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 sm:bottom-5 sm:right-5 sm:h-14 sm:w-14 lg:bottom-6 lg:right-6"
       aria-label="Open fullscreen comparison"
     >
       <FullscreenIcon className="h-6 w-6 sm:h-7 sm:w-7" />
@@ -306,11 +306,16 @@ function CloseIcon() {
   );
 }
 
-function RotateHint({ visible }) {
+function RotateHint({ visible, fullscreen = false }) {
   if (!visible) return null;
   return (
     <div
-      className="lux-rotate-hint pointer-events-none absolute bottom-20 left-1/2 z-30 flex w-max max-w-[calc(100%-2rem)] -translate-x-1/2 items-center rounded-full border border-white/22 bg-black/65 px-5 py-2.5 text-[12px] font-semibold tracking-[0.12em] text-white shadow-[0_20px_50px_-28px_rgba(0,0,0,0.92),0_0_0_1px_rgba(255,255,255,0.1)_inset] backdrop-blur-sm sm:bottom-24 sm:px-6 sm:text-[13px] md:hidden"
+      className={cx(
+        "lux-rotate-hint pointer-events-none absolute left-1/2 z-30 flex w-max max-w-[calc(100%-2rem)] -translate-x-1/2 items-center rounded-full border border-white/22 bg-black/65 px-5 py-2.5 text-[12px] font-semibold tracking-[0.12em] text-white shadow-[0_20px_50px_-28px_rgba(0,0,0,0.92),0_0_0_1px_rgba(255,255,255,0.1)_inset] backdrop-blur-sm sm:px-6 sm:text-[13px] md:hidden",
+        fullscreen
+          ? "bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
+          : "bottom-3 sm:bottom-4",
+      )}
     >
       <span className="mr-2.5 inline-flex h-5 w-5 shrink-0 items-center justify-center sm:h-6 sm:w-6">
         <svg viewBox="0 0 24 24" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" aria-hidden="true">
