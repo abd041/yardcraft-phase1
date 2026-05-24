@@ -18,12 +18,6 @@ const REVIEWS = [
   },
 ];
 
-const PROJECT_LABELS = [
-  "Outdoor patio & fireplace",
-  "Custom outdoor kitchen",
-  "Backyard garden retreat",
-];
-
 export function TrustSection() {
   const displayedReviews = REVIEWS.slice(0, MAX_GOOGLE_REVIEWS);
   const hasReviews = displayedReviews.length > 0;
@@ -74,18 +68,8 @@ export function TrustSection() {
               </div>
             )}
 
-            {/* Project highlights — text only */}
-            <div
-              data-stagger
-              className={hasReviews ? "mt-14 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-x-12" : "grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-x-12"}
-            >
-              {PROJECT_LABELS.map((label) => (
-                <ProjectLabel key={label} label={label} />
-              ))}
-            </div>
-
             {/* Google Maps CTA */}
-            <div data-stagger className="mt-12 flex justify-center">
+            <div data-stagger className={hasReviews ? "mt-14 flex justify-center sm:mt-16" : "mt-12 flex justify-center"}>
               <a
                 href={GOOGLE_MAPS_URL}
                 target="_blank"
@@ -127,14 +111,6 @@ function ReviewCard({ text, author, location, rating }) {
           <GoogleIcon size={14} />
         </a>
       </div>
-    </div>
-  );
-}
-
-function ProjectLabel({ label }) {
-  return (
-    <div className="border-t border-white/9 pt-5 text-[11px] font-medium tracking-[0.14em] uppercase text-muted/85 sm:pt-6">
-      {label}
     </div>
   );
 }
