@@ -13,6 +13,7 @@ import { PremiumBeforeAfter } from "@/components/design/PremiumBeforeAfter";
 import { BRAND } from "@/lib/brand";
 import { QuoteIqEmbed } from "@/components/quoteiq/QuoteIqEmbed";
 import { landingOutlineCtaClassName } from "@/components/ui/landingOutlineCta";
+import { resolveDesignComparisonUrls } from "@/lib/designImageUrls";
 
 const DESIGN_SMS_BODY =
   "Hi YardCraft, I just viewed the before & after concept for my property and wanted to explore possibilities for my outdoor space.";
@@ -34,18 +35,10 @@ export default async function Page({ params }) {
   const design = await getDesignBySlug(slug);
   if (!design) notFound();
 
-  const before = design.before_image || "";
-  const after = design.after_image || "";
-  const fallbackHeroImage = "/images/YardCraft Doorhangers.png";
-  function absoluteImageUrl(url) {
-    if (!url || typeof url !== "string") return url;
-    const t = url.trim();
-    if (t.startsWith("//")) return `https:${t}`;
-    return t;
-  }
-
-  const beforeSrc = absoluteImageUrl(before) || absoluteImageUrl(after) || fallbackHeroImage;
-  const afterSrc = absoluteImageUrl(after) || "";
+  const { beforeUrl, afterUrl } = resolveDesignComparisonUrls(
+    design.before_image,
+    design.after_image,
+  );
   const isAdmin = await isAdminRequest();
   const pageUrl = `${getSiteUrl()}/design/${slug}`;
 
@@ -72,8 +65,8 @@ export default async function Page({ params }) {
 
       <section className="touch-pan-y-safe relative z-20 -mt-2 pt-0 max-md:-mt-3 md:-mt-1 lg:-mt-3">
         <PremiumBeforeAfter
-          beforeUrl={beforeSrc}
-          afterUrl={afterSrc}
+          beforeUrl={beforeUrl}
+          afterUrl={afterUrl}
           className="relative z-20 w-full max-w-full overflow-hidden md:h-[78dvh] md:min-h-[70dvh] lg:h-[85vh] lg:min-h-[80vh]"
         />
 

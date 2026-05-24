@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 
+import { formatDisplayDateLong } from "@/lib/formatDate";
+
 function cx(...parts) {
   return parts.filter(Boolean).join(" ");
 }
@@ -12,15 +14,6 @@ function initials(email) {
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase() ?? "")
     .join("");
-}
-
-function formatDate(iso) {
-  if (!iso) return null;
-  try {
-    return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-  } catch {
-    return null;
-  }
 }
 
 export function AdminUsersClient({ initialUsers = [], currentUserId }) {
@@ -203,7 +196,7 @@ export function AdminUsersClient({ initialUsers = [], currentUserId }) {
               const isSelf = u.id === currentUserId;
               const isDeleting = deleting === u.id;
               const isConfirming = confirmDelete === u.id;
-              const lastSeen = u.lastSignIn ? formatDate(u.lastSignIn) : null;
+              const lastSeen = u.lastSignIn ? formatDisplayDateLong(u.lastSignIn) : null;
 
               return (
                 <div

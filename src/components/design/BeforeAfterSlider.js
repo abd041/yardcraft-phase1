@@ -124,6 +124,7 @@ export function BeforeAfterSlider({
   const hasBefore = Boolean(beforeUrl);
   const hasAfter = Boolean(afterUrl);
   const hasAny = hasBefore || hasAfter;
+  const canCompare = hasBefore && hasAfter;
 
   useEffect(() => {
     if (inspectActiveRef.current) return;
@@ -169,7 +170,7 @@ export function BeforeAfterSlider({
   }
 
   function onTrackPointerDown(e) {
-    if (!allowDrag || handleOnlyDrag) return;
+    if (!allowDrag || handleOnlyDrag || !canCompare) return;
     onUserInteract?.();
     draggingRef.current = true;
     e.currentTarget.setPointerCapture?.(e.pointerId);
@@ -354,7 +355,7 @@ export function BeforeAfterSlider({
   const trackTouchClass = isInspectMode ? "touch-none" : "touch-pan-y-safe";
 
   function onHandlePointerDown(e) {
-    if (!allowDrag || !hasBefore || !hasAfter) return;
+    if (!allowDrag || !canCompare) return;
     if (inspectActiveRef.current) return;
     onUserInteract?.();
     e.stopPropagation();
@@ -365,7 +366,7 @@ export function BeforeAfterSlider({
   }
 
   function onHandlePointerMove(e) {
-    if (!allowDrag || !hasBefore || !hasAfter) return;
+    if (!allowDrag || !canCompare) return;
     if (!draggingRef.current) return;
     onUserInteract?.();
     setFromClientX(e.clientX);
@@ -432,7 +433,7 @@ export function BeforeAfterSlider({
   ) : null;
 
   const dividerOverlay =
-    hasBefore && hasAfter ? (
+    canCompare ? (
       <div
         className="pointer-events-none absolute inset-y-0 z-30"
         style={{ left: `calc(${pct}% - 0.5px)` }}
@@ -552,25 +553,25 @@ export function BeforeAfterSlider({
               <div className="relative h-full w-full">{comparisonInner}</div>
             )}
 
-            {hasBefore ? (
-              <div
-                className={[
-                  "pointer-events-none absolute left-4 z-20 rounded-full border border-white/14 bg-black/35 px-3.5 py-1.5 text-[10px] font-medium tracking-[0.12em] uppercase text-white/80 backdrop-blur-sm shadow-[0_8px_24px_-18px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.1)]",
-                  chromeless ? "top-14" : "top-4",
-                ].join(" ")}
-              >
-                {beforeLabel}
-              </div>
-            ) : null}
-            {hasAfter ? (
-              <div
-                className={[
-                  "pointer-events-none absolute right-4 z-20 rounded-full border border-white/14 bg-black/35 px-3.5 py-1.5 text-[10px] font-medium tracking-[0.12em] uppercase text-white/80 backdrop-blur-sm shadow-[0_8px_24px_-18px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.1)]",
-                  chromeless ? "top-14" : "top-4",
-                ].join(" ")}
-              >
-                {afterLabel}
-              </div>
+            {canCompare ? (
+              <>
+                <div
+                  className={[
+                    "pointer-events-none absolute left-4 z-20 rounded-full border border-white/14 bg-black/35 px-3.5 py-1.5 text-[10px] font-medium tracking-[0.12em] uppercase text-white/80 backdrop-blur-sm shadow-[0_8px_24px_-18px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.1)]",
+                    chromeless ? "top-14" : "top-4",
+                  ].join(" ")}
+                >
+                  {beforeLabel}
+                </div>
+                <div
+                  className={[
+                    "pointer-events-none absolute right-4 z-20 rounded-full border border-white/14 bg-black/35 px-3.5 py-1.5 text-[10px] font-medium tracking-[0.12em] uppercase text-white/80 backdrop-blur-sm shadow-[0_8px_24px_-18px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.1)]",
+                    chromeless ? "top-14" : "top-4",
+                  ].join(" ")}
+                >
+                  {afterLabel}
+                </div>
+              </>
             ) : null}
           </>
         ) : (
@@ -594,7 +595,7 @@ export function BeforeAfterSlider({
               setValue(Number(e.target.value));
             }}
             className="w-full accent-[color-mix(in_oklab,var(--gold)_55%,var(--green))]"
-            disabled={!hasBefore || !hasAfter}
+            disabled={!canCompare}
           />
           <div className="w-10 text-right text-[11px] tabular-nums text-muted">
             {pct}%

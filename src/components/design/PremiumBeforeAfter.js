@@ -114,8 +114,9 @@ export function PremiumBeforeAfter({
     () => false,
   );
 
-  const showRotateHint = modalActive && portraitMobileHint;
   const hasAny = Boolean(beforeUrl || afterUrl);
+  const canCompare = Boolean(beforeUrl && afterUrl);
+  const showRotateHint = modalActive && portraitMobileHint && canCompare;
   const onChange = useCallback((pct) => setValue(pct), []);
 
   /** Mobile portrait: fixed 16/9 frame (landscape photos fit naturally). Desktop/tablet: dvh fill. */
@@ -215,14 +216,14 @@ export function PremiumBeforeAfter({
                 aria-hidden="true"
               />
             ) : null}
-            {hasAny && !modalActive ? <FullscreenButton onClick={openFullscreen} /> : null}
-            <RotateHint visible={!modalActive && portraitMobileHint} />
+            {hasAny && canCompare && !modalActive ? <FullscreenButton onClick={openFullscreen} /> : null}
+            <RotateHint visible={!modalActive && portraitMobileHint && canCompare} />
           </div>
         ) : (
           <div className="relative h-full min-h-0 w-full overflow-hidden">
             {renderInlineSlider("fill")}
-            {hasAny && !modalActive ? <FullscreenButton onClick={openFullscreen} /> : null}
-            <RotateHint visible={!modalActive && portraitMobileHint} />
+            {hasAny && canCompare && !modalActive ? <FullscreenButton onClick={openFullscreen} /> : null}
+            <RotateHint visible={!modalActive && portraitMobileHint && canCompare} />
           </div>
         )}
       </div>

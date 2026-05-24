@@ -8,7 +8,7 @@ import { ToastHost } from "@/components/ui/ToastHost";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
 import { validateBrowserFile } from "@/lib/uploadImage";
-import { previewUrlWithCacheBust } from "@/lib/adminUploadClient";
+import { previewUrlWithCacheBust, uploadDesignImage } from "@/lib/adminUploadClient";
 import { dedupeDesignsByNumber } from "@/lib/designSlug";
 import {
   formatDesignNumber,
@@ -17,6 +17,7 @@ import {
   isValidDesignSlug,
   resolveDesignSlug,
 } from "@/lib/designSlug";
+import { formatDisplayDate, formatDisplayDateTime } from "@/lib/formatDate";
 
 function cx(...parts) {
   return parts.filter(Boolean).join(" ");
@@ -33,13 +34,6 @@ function computeStatus(d) {
   if (before && !after) return { key: "missing_after", label: "Missing after", pct: 50, tone: "warn" };
   if (!before && after) return { key: "missing_before", label: "Missing before", pct: 50, tone: "warn" };
   return { key: "draft", label: "Draft", pct: 0, tone: "muted" };
-}
-
-function formatWhen(ts) {
-  if (!ts) return "";
-  const d = new Date(ts);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString();
 }
 
 function toneClasses(tone) {
@@ -603,7 +597,7 @@ export function AdminDesignsClient({ initialDesigns }) {
                           <span>After</span>
                         </span>
                         {updatedAt ? (
-                          <span className="ml-auto text-muted/80">Updated {new Date(updatedAt).toLocaleDateString()}</span>
+                          <span className="ml-auto text-muted/80">Updated {formatDisplayDate(updatedAt)}</span>
                         ) : null}
                       </div>
 
@@ -657,7 +651,7 @@ export function AdminDesignsClient({ initialDesigns }) {
                 <div className="mt-2 text-xs text-muted">
                   Last modified:{" "}
                   <span className="text-foreground">
-                    {formatWhen(selected.updated_at || selected.created_at || null) || "—"}
+                    {formatDisplayDateTime(selected.updated_at || selected.created_at || null) || "—"}
                   </span>
                 </div>
               ) : (
@@ -861,7 +855,7 @@ function AssetCard({
             ) : (
               <span className="text-muted">Not set</span>
             )}
-            {updatedAt ? <span className="ml-2 text-muted/80">• {formatWhen(updatedAt)}</span> : null}
+            {updatedAt ? <span className="ml-2 text-muted/80">• {formatDisplayDateTime(updatedAt)}</span> : null}
             {updatedBy ? <span className="ml-2 text-muted/80">• By {String(updatedBy).slice(0, 8)}…</span> : null}
           </div>
           <div className="mt-2 text-[11px] text-muted/85">{guidance}</div>
