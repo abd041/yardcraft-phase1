@@ -69,7 +69,7 @@ export function SiteHeader() {
 
           <Button
             href="#quote"
-            className="hidden shrink whitespace-nowrap px-4 py-2 text-center text-[12px] leading-normal sm:inline-flex"
+            className="!hidden shrink whitespace-nowrap px-4 py-2 text-center text-[12px] leading-normal portrait:max-md:!hidden landscape:max-md:!inline-flex md:!inline-flex"
           >
             Request Your Custom Plan
           </Button>
